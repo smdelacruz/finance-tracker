@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
     <title>Investment & Bank Transfer Tracker</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -35,27 +37,66 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Header Navigation -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
+    <!-- Owner sign-in. The ledger stays hidden until this succeeds. -->
+    <div id="login-screen" class="flex-1 flex items-center justify-center px-4 py-16">
+        <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
+            <div class="flex items-center gap-3 mb-6">
                 <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-200">
-                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                    <i data-lucide="lock" class="w-6 h-6"></i>
                 </div>
                 <div>
                     <h1 class="font-bold text-lg text-slate-900 leading-tight">FlowTrack Financial</h1>
-                    <p class="text-xs text-slate-500">Investment & Bank Transfer Hub</p>
+                    <p class="text-xs text-slate-500">Private owner sign-in</p>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <button onclick="resetToDemoData()" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
-                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-                    Reset Note Demo
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label for="login-username" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Username</label>
+                    <input type="text" id="login-username" name="username" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" name="password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" minlength="8" class="w-full px-3 py-2 pr-16 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="button" id="toggle-password" onclick="togglePasswordVisibility(this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-slate-700 px-2 py-1">Show</button>
+                    </div>
+                </div>
+                <p id="login-error" class="hidden text-sm text-red-600" role="alert"></p>
+                <button type="submit" id="login-submit" class="w-full px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-lg shadow-sm transition-colors">
+                    Unlock ledger
                 </button>
-                <button onclick="openModal()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all flex items-center gap-2">
+            </form>
+            <p class="text-xs text-slate-400 mt-4">This browser tab stays signed in until you sign out or close it.</p>
+        </div>
+    </div>
+
+    <div id="app-shell" class="hidden flex-1 flex-col">
+    <!-- Header Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-3 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+                <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-200 shrink-0">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="font-bold text-base sm:text-lg text-slate-900 leading-tight truncate">FlowTrack Financial</h1>
+                    <p class="hidden sm:block text-xs text-slate-500">Investment & Bank Transfer Hub</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="signOut()" aria-label="Sign out" class="px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Sign out</span>
+                </button>
+                <button type="button" onclick="resetToDemoData()" aria-label="Reset Note Demo" class="px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Reset Note Demo</span>
+                </button>
+                <button type="button" onclick="openModal()" aria-label="Add Entry" class="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all flex items-center gap-2">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    Add Entry
+                    <span class="hidden sm:inline">Add Entry</span>
                 </button>
             </div>
         </div>
@@ -180,7 +221,7 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Transaction Title / Asset</label>
-                    <input type="text" id="entry-title" required placeholder="e.g. Salary, FTSE World, NVIDIA" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="entry-title" required placeholder="e.g. Salary, index fund, shares" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -225,39 +266,39 @@
             </form>
         </div>
     </div>
+    </div>
 
     <!-- Application JavaScript Logic -->
     <script>
-        // Demo Dataset initialized from handwritten note
-        const INITIAL_DEMO_DATA = [
-            { id: '1', title: 'Salary', amount: 3600, type: 'INCOME', source: 'Commerzbank', destination: 'Commerzbank' },
-            { id: '2', title: 'Trade Republic (Transfer)', amount: 500, type: 'EXPENSE', source: 'Commerzbank', destination: 'Trade Republic' },
-            { id: '3', title: 'FTSE World', amount: 200, type: 'EXPENSE', source: 'Commerzbank', destination: 'Trade Republic' },
-            { id: '4', title: 'Alphabet', amount: 80, type: 'EXPENSE', source: 'Commerzbank', destination: 'Commerzbank' },
-            { id: '5', title: 'Core MSCI', amount: 100, type: 'EXPENSE', source: 'Trade Republic', destination: 'Trade Republic' },
-            { id: '6', title: 'NVIDIA', amount: 100, type: 'EXPENSE', source: 'Commerzbank', destination: 'Commerzbank' },
-            { id: '7', title: 'Uranium', amount: 50, type: 'EXPENSE', source: 'Commerzbank', destination: 'Commerzbank' },
-            { id: '8', title: 'Marvell', amount: 100, type: 'EXPENSE', source: 'Trade Republic', destination: 'Trade Republic' },
-            { id: '9', title: 'FTSE Korea', amount: 50, type: 'EXPENSE', source: 'Trade Republic', destination: 'Trade Republic' },
-            { id: '10', title: 'S&P 500', amount: 200, type: 'EXPENSE', source: 'Commerzbank', destination: 'Commerzbank' },
-            { id: '11', title: 'FTSE Taiwan', amount: 70, type: 'EXPENSE', source: 'Trade Republic', destination: 'Trade Republic' },
-            { id: '12', title: 'Vanguard', amount: 100, type: 'EXPENSE', source: 'Commerzbank', destination: 'Scalable Capital' },
-            { id: '13', title: 'Vanguard FTSE', amount: 100, type: 'EXPENSE', source: 'Commerzbank', destination: 'Scalable Capital' },
-            { id: '14', title: 'Scalable MSCI', amount: 100, type: 'EXPENSE', source: 'Commerzbank', destination: 'Scalable Capital' }
-        ];
+        // AUTH_CONFIG_START
+        const AUTH_CONFIG = {
+            "username": "sdelacruz",
+            "iterations": 250000,
+            "salt": "KdxkpXC/XGDeTjf5vf+wSQ==",
+            "verifier": "d77r3AHe8b0x39MWIdyBIdeeq5Ti4MBjl1z9FrfVqcM=",
+            "seedIv": "qHtjYlprrOSAplih",
+            "seedData": "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"
+        };
+        // AUTH_CONFIG_END
 
-        // State variables
+        const textEncoder = new TextEncoder();
+        const textDecoder = new TextDecoder();
+
+        // State variables. The ledger stays empty until the owner password unlocks it.
         let transactions = [];
+        let seedTransactions = null;
+        let cryptoKey = null;
         let activeBankFilter = 'ALL';
         let searchQuery = '';
         let typeFilter = 'ALL';
         let chartInstance = null;
 
-        // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
-            loadTransactions();
             initLucide();
-            renderApp();
+            if (AUTH_CONFIG && AUTH_CONFIG.username) {
+                document.getElementById('login-username').value = AUTH_CONFIG.username;
+            }
+            restoreSession();
         });
 
         function initLucide() {
@@ -266,27 +307,220 @@
             }
         }
 
-        function loadTransactions() {
-            const saved = localStorage.getItem('flowtrack_transactions');
-            if (saved) {
-                try {
-                    transactions = JSON.parse(saved);
-                } catch (e) {
-                    transactions = [...INITIAL_DEMO_DATA];
-                }
+        function bytesToB64(bytes) {
+            let binary = '';
+            bytes.forEach(byte => {
+                binary += String.fromCharCode(byte);
+            });
+            return btoa(binary);
+        }
+
+        function b64ToBytes(value) {
+            const binary = atob(value);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        function timingSafeEqual(left, right) {
+            const length = Math.max(left.length, right.length);
+            let diff = left.length ^ right.length;
+            for (let i = 0; i < length; i++) {
+                diff |= (left[i] || 0) ^ (right[i] || 0);
+            }
+            return diff === 0;
+        }
+
+        async function deriveKeys(password) {
+            const baseKey = await crypto.subtle.importKey(
+                'raw',
+                textEncoder.encode(password),
+                'PBKDF2',
+                false,
+                ['deriveBits']
+            );
+            const salt = b64ToBytes(AUTH_CONFIG.salt);
+            const masterBits = await crypto.subtle.deriveBits({
+                name: 'PBKDF2',
+                salt,
+                iterations: AUTH_CONFIG.iterations,
+                hash: 'SHA-256'
+            }, baseKey, 256);
+            const hkdfKey = await crypto.subtle.importKey('raw', masterBits, 'HKDF', false, ['deriveBits']);
+            const verifier = await crypto.subtle.deriveBits({
+                name: 'HKDF',
+                hash: 'SHA-256',
+                salt,
+                info: textEncoder.encode('flowtrack-verify')
+            }, hkdfKey, 256);
+            const encBits = await crypto.subtle.deriveBits({
+                name: 'HKDF',
+                hash: 'SHA-256',
+                salt,
+                info: textEncoder.encode('flowtrack-encrypt')
+            }, hkdfKey, 256);
+            const key = await crypto.subtle.importKey('raw', encBits, 'AES-GCM', true, ['encrypt', 'decrypt']);
+            return { verifier: new Uint8Array(verifier), key };
+        }
+
+        async function encryptJson(value) {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const cipher = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv },
+                cryptoKey,
+                textEncoder.encode(JSON.stringify(value))
+            );
+            return {
+                iv: bytesToB64(iv),
+                data: bytesToB64(new Uint8Array(cipher))
+            };
+        }
+
+        async function decryptJson(iv, data, key = cryptoKey) {
+            const plain = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: b64ToBytes(iv) },
+                key,
+                b64ToBytes(data)
+            );
+            return JSON.parse(textDecoder.decode(plain));
+        }
+
+        async function saveTransactions() {
+            if (!cryptoKey) return;
+            const payload = await encryptJson(transactions);
+            localStorage.setItem('flowtrack_vault', JSON.stringify(payload));
+            localStorage.removeItem('flowtrack_transactions');
+        }
+
+        async function openVault(key) {
+            cryptoKey = key;
+            seedTransactions = await decryptJson(AUTH_CONFIG.seedIv, AUTH_CONFIG.seedData);
+
+            const vaultRaw = localStorage.getItem('flowtrack_vault');
+            const legacyRaw = localStorage.getItem('flowtrack_transactions');
+            if (vaultRaw) {
+                const parsed = JSON.parse(vaultRaw);
+                transactions = await decryptJson(parsed.iv, parsed.data);
+            } else if (legacyRaw) {
+                transactions = JSON.parse(legacyRaw);
+                await saveTransactions();
             } else {
-                transactions = [...INITIAL_DEMO_DATA];
-                saveTransactions();
+                transactions = JSON.parse(JSON.stringify(seedTransactions));
+                await saveTransactions();
+            }
+
+            const rawKey = new Uint8Array(await crypto.subtle.exportKey('raw', cryptoKey));
+            sessionStorage.setItem('flowtrack_session', bytesToB64(rawKey));
+            document.getElementById('login-password').value = '';
+            showApp();
+        }
+
+        function showApp() {
+            const login = document.getElementById('login-screen');
+            login.classList.add('hidden');
+            login.classList.remove('flex');
+            const app = document.getElementById('app-shell');
+            app.classList.remove('hidden');
+            app.classList.add('flex');
+            renderApp();
+        }
+
+        async function restoreSession() {
+            const savedKey = sessionStorage.getItem('flowtrack_session');
+            if (!savedKey || !AUTH_CONFIG) return;
+            try {
+                const key = await crypto.subtle.importKey(
+                    'raw',
+                    b64ToBytes(savedKey),
+                    'AES-GCM',
+                    true,
+                    ['encrypt', 'decrypt']
+                );
+                await openVault(key);
+            } catch (error) {
+                sessionStorage.removeItem('flowtrack_session');
             }
         }
 
-        function saveTransactions() {
-            localStorage.setItem('flowtrack_transactions', JSON.stringify(transactions));
+        function setLoginError(message) {
+            const el = document.getElementById('login-error');
+            el.textContent = message;
+            el.classList.toggle('hidden', !message);
         }
 
-        function resetToDemoData() {
-            transactions = JSON.parse(JSON.stringify(INITIAL_DEMO_DATA));
-            saveTransactions();
+        function togglePasswordVisibility(button) {
+            const input = document.getElementById('login-password');
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            button.textContent = showing ? 'Show' : 'Hide';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const button = document.getElementById('login-submit');
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            setLoginError('');
+            button.disabled = true;
+            button.textContent = 'Checking…';
+
+            try {
+                if (!window.crypto?.subtle || !AUTH_CONFIG) {
+                    setLoginError('Sign-in needs the published lock and a secure https page.');
+                    return;
+                }
+
+                const { verifier, key } = await deriveKeys(password);
+                const usernameOk = timingSafeEqual(textEncoder.encode(username), textEncoder.encode(AUTH_CONFIG.username));
+                const passwordOk = timingSafeEqual(verifier, b64ToBytes(AUTH_CONFIG.verifier));
+                if (!usernameOk || !passwordOk) {
+                    setLoginError('That username or password is incorrect.');
+                    document.getElementById('login-password').value = '';
+                    return;
+                }
+
+                await openVault(key);
+            } catch (error) {
+                cryptoKey = null;
+                sessionStorage.removeItem('flowtrack_session');
+                setLoginError('The ledger could not be opened on this browser.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Unlock ledger';
+            }
+        }
+
+        function signOut() {
+            cryptoKey = null;
+            transactions = [];
+            seedTransactions = null;
+            sessionStorage.removeItem('flowtrack_session');
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstance = null;
+            }
+            document.getElementById('kpi-cards').innerHTML = '';
+            document.getElementById('transactions-table-body').innerHTML = '';
+            document.getElementById('bank-breakdown-list').innerHTML = '';
+            document.getElementById('entry-count').textContent = '0 items';
+            closeModal();
+            const app = document.getElementById('app-shell');
+            app.classList.add('hidden');
+            app.classList.remove('flex');
+            const login = document.getElementById('login-screen');
+            login.classList.remove('hidden');
+            login.classList.add('flex');
+            document.getElementById('login-password').value = '';
+            setLoginError('');
+            initLucide();
+        }
+
+        async function resetToDemoData() {
+            if (!seedTransactions) return;
+            transactions = JSON.parse(JSON.stringify(seedTransactions));
+            await saveTransactions();
             renderApp();
         }
 
@@ -611,7 +845,7 @@
             }, 200);
         }
 
-        function handleFormSubmit(e) {
+        async function handleFormSubmit(e) {
             e.preventDefault();
 
             const id = document.getElementById('entry-id').value;
@@ -640,14 +874,14 @@
                 transactions.unshift(newItem);
             }
 
-            saveTransactions();
+            await saveTransactions();
             renderApp();
             closeModal();
         }
 
-        function deleteEntry(id) {
+        async function deleteEntry(id) {
             transactions = transactions.filter(t => t.id !== id);
-            saveTransactions();
+            await saveTransactions();
             renderApp();
         }
 
