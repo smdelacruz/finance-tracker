@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
-    <title>Investment & Bank Transfer Tracker</title>
+    <title>WealthTracker</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -35,17 +35,17 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
     <!-- Owner sign-in. The ledger stays hidden until this succeeds. -->
     <div id="login-screen" class="flex-1 flex items-center justify-center px-4 py-16">
-        <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-8">
+        <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-8">
             <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-200">
-                    <i data-lucide="lock" class="w-6 h-6"></i>
+                <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+                    <i data-lucide="lock" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg text-slate-900 leading-tight">FlowTrack Financial</h1>
+                    <h1 class="font-bold text-lg tracking-tight text-slate-900 leading-tight">Wealth<span class="text-amber-600">Tracker</span></h1>
                     <p class="text-xs text-slate-500">Private owner sign-in</p>
                 </div>
             </div>
@@ -53,17 +53,17 @@
             <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
                     <label for="login-username" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Username</label>
-                    <input type="text" id="login-username" name="username" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="login-username" name="username" required autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" class="w-full min-h-12 px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
                 <div>
                     <label for="login-password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Password</label>
                     <div class="relative">
-                        <input type="password" id="login-password" name="password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" minlength="8" class="w-full px-3 py-2 pr-16 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="password" id="login-password" name="password" required autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" minlength="8" class="w-full min-h-12 px-3 py-3 pr-16 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500">
                         <button type="button" id="toggle-password" onclick="togglePasswordVisibility(this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 hover:text-slate-700 px-2 py-1">Show</button>
                     </div>
                 </div>
                 <p id="login-error" class="hidden text-sm text-red-600" role="alert"></p>
-                <button type="submit" id="login-submit" class="w-full px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 rounded-lg shadow-sm transition-colors">
+                <button type="submit" id="login-submit" class="w-full min-h-12 px-4 py-3 text-base font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:opacity-60 rounded-xl shadow-sm transition-colors">
                     Unlock ledger
                 </button>
             </form>
@@ -73,40 +73,36 @@
 
     <div id="app-shell" class="hidden flex-1 flex-col">
     <!-- Header Navigation -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-3 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2 min-w-0">
-                <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-200 shrink-0">
-                    <i data-lucide="wallet" class="w-6 h-6"></i>
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+                    <i data-lucide="trending-up" class="w-5 h-5"></i>
                 </div>
-                <div class="min-w-0">
-                    <h1 class="font-bold text-base sm:text-lg text-slate-900 leading-tight truncate">FlowTrack Financial</h1>
-                    <p class="hidden sm:block text-xs text-slate-500">Investment & Bank Transfer Hub</p>
-                </div>
+                <h1 class="font-bold text-lg tracking-tight text-slate-900 truncate">Wealth<span class="text-amber-600">Tracker</span></h1>
             </div>
 
             <div class="flex items-center gap-1.5 shrink-0">
-                <button type="button" onclick="signOut()" aria-label="Sign out" class="px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+                <button type="button" onclick="signOut()" aria-label="Sign out" class="min-h-12 sm:min-h-0 px-3 py-3 sm:py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center gap-1.5">
                     <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">Sign out</span>
                 </button>
-                <button type="button" onclick="resetToDemoData()" aria-label="Reset Note Demo" class="px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors flex items-center gap-1.5">
+                <button type="button" onclick="resetToDemoData()" aria-label="Reset Note Demo" class="min-h-12 sm:min-h-0 px-3 py-3 sm:py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center gap-1.5">
                     <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">Reset Note Demo</span>
                 </button>
-                <button type="button" onclick="openModal()" aria-label="Add Entry" class="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all flex items-center gap-2">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    <span class="hidden sm:inline">Add Entry</span>
+                <button type="button" onclick="openModal()" aria-label="New Entry" class="hidden sm:inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-xl text-sm shadow-sm transition">
+                    + New Entry
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 sm:pb-8 flex-1 w-full space-y-6">
 
         <!-- Quick Summary Metrics Bar -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="kpi-cards">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="kpi-cards">
             <!-- Dynamically populated KPI cards -->
         </div>
 
@@ -115,15 +111,17 @@
             <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none" id="bank-filter-tabs">
                 <!-- Dynamically populated filter buttons -->
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                 <div class="relative w-full md:w-64">
                     <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="search-input" placeholder="Search asset or account..." oninput="handleSearch()" class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <input type="text" id="search-input" placeholder="Search title, bank, category..." oninput="handleSearch()" class="w-full min-h-12 pl-9 pr-4 py-3 text-base border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
                 </div>
-                <select id="type-filter" onchange="handleTypeFilter()" class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select id="type-filter" onchange="handleTypeFilter()" class="min-h-12 text-base border border-slate-200 rounded-xl px-3 py-3 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500">
                     <option value="ALL">All Types</option>
                     <option value="INCOME">Income (+)</option>
-                    <option value="EXPENSE">Invest/Debit (-)</option>
+                    <option value="INVESTMENT_OUTFLOW">Investment (-)</option>
+                    <option value="FIXED_EXPENSE">Expense (-)</option>
+                    <option value="INTERNAL_TRANSFER">Transfer</option>
                 </select>
             </div>
         </div>
@@ -136,22 +134,26 @@
                 <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                     <div>
                         <h2 class="font-semibold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="list" class="w-4 h-4 text-indigo-600"></i>
+                            <i data-lucide="list" class="w-4 h-4 text-amber-600"></i>
                             Allocations & Deductions
                         </h2>
                         <p class="text-xs text-slate-500" id="filter-subtitle">Showing all financial transactions</p>
                     </div>
-                    <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full" id="entry-count">0 items</span>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full" id="entry-count">0 items</span>
                 </div>
 
-                <div class="overflow-x-auto flex-1">
+                <div id="mobile-ledger" class="sm:hidden divide-y divide-slate-100"></div>
+
+                <div class="hidden sm:block overflow-x-auto flex-1">
                     <table class="w-full text-left text-sm text-slate-600">
                         <thead class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider border-b border-slate-100">
                             <tr>
+                                <th class="px-4 py-3 font-semibold"><button type="button" onclick="setSort('date')" class="inline-flex items-center gap-1 hover:text-slate-800">Date <span id="sort-date"></span></button></th>
                                 <th class="px-4 py-3 font-semibold">Title / Asset</th>
-                                <th class="px-4 py-3 font-semibold">Source Account</th>
-                                <th class="px-4 py-3 font-semibold">Broker / Platform</th>
-                                <th class="px-4 py-3 font-semibold text-right">Amount (€)</th>
+                                <th class="px-4 py-3 font-semibold"><button type="button" onclick="setSort('category')" class="inline-flex items-center gap-1 hover:text-slate-800">Category <span id="sort-category"></span></button></th>
+                                <th class="px-4 py-3 font-semibold"><button type="button" onclick="setSort('source')" class="inline-flex items-center gap-1 hover:text-slate-800">Source <span id="sort-source"></span></button></th>
+                                <th class="px-4 py-3 font-semibold">Destination</th>
+                                <th class="px-4 py-3 font-semibold text-right"><button type="button" onclick="setSort('amount')" class="inline-flex items-center gap-1 hover:text-slate-800 ml-auto">Amount (€) <span id="sort-amount"></span></button></th>
                                 <th class="px-4 py-3 font-semibold text-center">Actions</th>
                             </tr>
                         </thead>
@@ -177,20 +179,22 @@
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <div class="flex items-center justify-between">
                         <h3 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                            <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-600"></i>
-                            Investment Distribution
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-amber-600"></i>
+                            Money Split
                         </h3>
-                        <span class="text-xs text-slate-400">By Asset</span>
+                        <span class="text-xs text-slate-400">3 categories</span>
                     </div>
-                    <div class="relative h-56 flex items-center justify-center">
+                    <div class="relative h-52 flex items-center justify-center">
                         <canvas id="allocationChart"></canvas>
+                        <div id="chart-center" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center"></div>
                     </div>
+                    <div id="chart-legend" class="space-y-2"></div>
                 </div>
 
                 <!-- Bank Flow Breakdowns -->
                 <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                        <i data-lucide="building-2" class="w-4 h-4 text-indigo-600"></i>
+                        <i data-lucide="building-2" class="w-4 h-4 text-amber-600"></i>
                         Bank Outflow Breakdown
                     </h3>
                     <div id="bank-breakdown-list" class="space-y-3">
@@ -204,14 +208,22 @@
     </main>
 
     <!-- Modal Form for Adding/Editing Entries -->
-    <div id="entryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full mx-4 overflow-hidden transform scale-95 transition-transform duration-200" id="modalContainer">
+    <button type="button" onclick="openModal()" aria-label="New Entry" class="sm:hidden fixed bottom-6 right-6 z-30 h-14 w-14 rounded-full bg-amber-500 hover:bg-amber-600 text-white shadow-xl flex items-center justify-center">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+    </button>
+    <div id="undo-toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 sm:bottom-6 items-center gap-3 bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-xl" role="status">
+        <span>Entry deleted</span>
+        <button type="button" onclick="undoDelete()" class="font-semibold text-amber-300 min-h-12 px-2">Undo</button>
+    </div>
+
+    <div id="entryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 items-end sm:items-center justify-center hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-t-2xl sm:rounded-2xl border border-slate-200 shadow-xl w-full sm:max-w-md sm:mx-4 max-h-[90vh] overflow-y-auto transform translate-y-4 sm:translate-y-0 sm:scale-95 transition-transform duration-200" id="modalContainer">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2" id="modalTitle">
-                    <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-600"></i>
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-amber-600"></i>
                     Add Transaction
                 </h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors">
+                <button type="button" onclick="closeModal()" aria-label="Close" class="min-h-12 min-w-12 inline-flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -221,47 +233,70 @@
 
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Transaction Title / Asset</label>
-                    <input type="text" id="entry-title" required placeholder="e.g. Salary, index fund, shares" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="text" id="entry-title" required placeholder="e.g. Salary, index fund, rent" class="w-full min-h-12 px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Type</label>
-                        <select id="entry-type" required onchange="toggleTypeFields()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="EXPENSE">Investment / Debit (-)</option>
+                        <select id="entry-type" required onchange="toggleTypeFields()" class="w-full min-h-12 px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                            <option value="FIXED_EXPENSE">Expense (-)</option>
+                            <option value="INVESTMENT_OUTFLOW">Investment (-)</option>
                             <option value="INCOME">Income (+)</option>
+                            <option value="INTERNAL_TRANSFER">Transfer</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Amount (€)</label>
-                        <input type="number" id="entry-amount" required step="0.01" min="0.01" placeholder="0.00" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="number" id="entry-amount" required step="0.01" min="0.01" placeholder="0.00" class="w-full min-h-12 px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Source Account</label>
-                        <select id="entry-source" required class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="Commerzbank">Commerzbank</option>
-                            <option value="Trade Republic">Trade Republic</option>
-                            <option value="Scalable Capital">Scalable Capital</option>
-                            <option value="Other Bank">Other Bank</option>
-                        </select>
+                        <label for="entry-date" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Date</label>
+                        <input type="date" id="entry-date" required class="w-full min-h-12 px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Broker / Destination</label>
-                        <select id="entry-destination" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                            <option value="Commerzbank">Commerzbank</option>
-                            <option value="Trade Republic">Trade Republic</option>
-                            <option value="Scalable Capital">Scalable Capital</option>
-                            <option value="Direct/Other">Direct/Other</option>
+                        <label for="entry-category" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Category</label>
+                        <select id="entry-category" required class="w-full min-h-12 px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white">
+                            <option>Salary</option>
+                            <option>ETF</option>
+                            <option>Stock</option>
+                            <option>Crypto</option>
+                            <option>Rent</option>
+                            <option>Insurance</option>
+                            <option>Subscriptions</option>
                         </select>
                     </div>
                 </div>
 
+                <label class="flex items-center gap-3 min-h-12 text-sm text-slate-700">
+                    <input type="checkbox" id="entry-recurring" class="h-5 w-5 rounded border-slate-300 text-amber-500 focus:ring-amber-500">
+                    Monthly recurring
+                </label>
+
+                <div>
+                    <label for="entry-notes" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Notes</label>
+                    <textarea id="entry-notes" rows="2" placeholder="Optional note" class="w-full px-3 py-3 border border-slate-200 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label id="source-label" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Source Account</label>
+                        <input type="hidden" id="entry-source" value="Commerzbank">
+                        <div id="source-picker" class="grid grid-cols-1 gap-1.5"></div>
+                    </div>
+                    <div>
+                        <label id="destination-label" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Paid to</label>
+                        <input type="hidden" id="entry-destination" value="Direct/Other">
+                        <div id="destination-picker" class="grid grid-cols-1 gap-1.5"></div>
+                    </div>
+                </div>
+
                 <div class="pt-3 flex items-center justify-end space-x-3 border-t border-slate-100">
-                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors">Save Transaction</button>
+                    <button type="button" onclick="closeModal()" class="min-h-12 px-4 py-3 text-base font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
+                    <button type="submit" class="min-h-12 px-4 py-3 text-base font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-colors">Save Transaction</button>
                 </div>
             </form>
         </div>
@@ -291,7 +326,125 @@
         let activeBankFilter = 'ALL';
         let searchQuery = '';
         let typeFilter = 'ALL';
+        let sortKey = 'date';
+        let sortDir = 'desc';
         let chartInstance = null;
+        let expandedIds = new Set();
+        let undoTimer = null;
+        let undoEntry = null;
+        let amountEditLock = false;
+
+        const SOURCE_ACCOUNTS = ['Commerzbank', 'Trade Republic', 'Scalable Capital', 'Deutsche Bank', 'DKB', 'N26', 'Other Bank'];
+        const DEST_ACCOUNTS = ['Commerzbank', 'Trade Republic', 'Scalable Capital', 'Deutsche Bank', 'DKB', 'N26', 'Direct/Other'];
+        const BANK_FILTERS = ['ALL', ...SOURCE_ACCOUNTS];
+        const CATEGORIES = ['Salary', 'ETF', 'Stock', 'Crypto', 'Rent', 'Insurance', 'Subscriptions'];
+
+        function formatEuro(amount) {
+            return '€' + Math.abs(Number(amount) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function todayISO() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function canonicalType(type, version) {
+            if (Number(version) < 2 && type === 'EXPENSE') return 'INVESTMENT_OUTFLOW';
+            if (type === 'INVESTMENT' || type === 'INVESTMENT_OUTFLOW') return 'INVESTMENT_OUTFLOW';
+            if (type === 'EXPENSE' || type === 'FIXED_EXPENSE') return 'FIXED_EXPENSE';
+            if (type === 'INTERNAL_TRANSFER') return 'INTERNAL_TRANSFER';
+            return 'INCOME';
+        }
+
+        function isInvestment(item) { return item.type === 'INVESTMENT_OUTFLOW' || item.type === 'INVESTMENT'; }
+        function isExpense(item) { return item.type === 'FIXED_EXPENSE' || item.type === 'EXPENSE'; }
+        function isIncome(item) { return item.type === 'INCOME'; }
+        function isTransfer(item) { return item.type === 'INTERNAL_TRANSFER'; }
+        function bankSource(item) { return item.sourceBank || item.source || 'Other Bank'; }
+        function bankDest(item) { return item.destinationBank || item.destination || 'Direct/Other'; }
+
+        function inferCategory(title, type) {
+            const name = String(title || '').toLowerCase();
+            if (name.includes('salary')) return 'Salary';
+            if (name.includes('rent')) return 'Rent';
+            if (name.includes('insur')) return 'Insurance';
+            if (/ftse|msci|vanguard|s&p|etf|world|core/.test(name)) return 'ETF';
+            if (/nvidia|alphabet|marvell|uranium|stock/.test(name)) return 'Stock';
+            if (name.includes('crypto')) return 'Crypto';
+            if (type === 'INVESTMENT_OUTFLOW') return 'ETF';
+            if (type === 'FIXED_EXPENSE') return 'Subscriptions';
+            if (type === 'INCOME') return 'Salary';
+            return 'ETF';
+        }
+
+        function hydrateEntry(item, version) {
+            const type = canonicalType(item.type, version);
+            const sourceBank = item.sourceBank || item.source || 'Other Bank';
+            const destinationBank = item.destinationBank || item.destination || (type === 'FIXED_EXPENSE' ? 'Direct/Other' : sourceBank);
+            const category = CATEGORIES.includes(item.category) ? item.category : inferCategory(item.title, type);
+            return {
+                id: String(item.id),
+                date: item.date || '2026-10-01',
+                title: item.title,
+                type,
+                amount: Math.abs(Number(item.amount) || 0),
+                sourceBank,
+                destinationBank,
+                source: sourceBank,
+                destination: destinationBank,
+                category,
+                isRecurring: Boolean(item.isRecurring),
+                notes: item.notes || ''
+            };
+        }
+
+        function sumWhere(predicate) {
+            return transactions.filter(predicate).reduce((sum, item) => sum + Math.abs(item.amount), 0);
+        }
+
+        function accountLogo(name, size = 22) {
+            const marks = {
+                'Commerzbank': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#FFD800"/><path d="M7 21c3.2-7 6.2-9 9-9s5.8 2 9 9" fill="none" stroke="#1c1917" stroke-width="2.4" stroke-linecap="round"/><path d="M9 17.5c2.4 3.4 4.6 4.6 7 4.6s4.6-1.2 7-4.6" fill="none" stroke="#1c1917" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+                'Trade Republic': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#000000"/><text x="16" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" font-family="Inter, sans-serif">TR</text></svg>`,
+                'Scalable Capital': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#00E5B2"/><path d="M13 8H9v16h4M19 8h4v16h-4" fill="none" stroke="#111827" stroke-width="2.4" stroke-linejoin="round"/></svg>`,
+                'Deutsche Bank': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0018A8"/><path d="M10 24L22 8" stroke="#ffffff" stroke-width="3.4" stroke-linecap="round"/></svg>`,
+                'DKB': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#005B9A"/><text x="16" y="20.5" text-anchor="middle" font-size="9" font-weight="700" fill="#ffffff" font-family="Inter, sans-serif">DKB</text></svg>`,
+                'N26': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#00D09C"/><text x="16" y="21" text-anchor="middle" font-size="11" font-weight="700" fill="#042f2e" font-family="Inter, sans-serif">N26</text></svg>`,
+                'Other Bank': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#475569"/><path d="M7 14.5 16 8l9 6.5M10 14.5V23h12v-8.5M14 23v-4h4v4" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
+                'Direct/Other': `<svg width="${size}" height="${size}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#E2E8F0"/><path d="M9 16h11M16 11l6 5-6 5" fill="none" stroke="#334155" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+            };
+            return `<span class="inline-flex shrink-0">${marks[name] || marks['Other Bank']}</span>`;
+        }
+
+        function accountChip(name) {
+            return `<span class="inline-flex items-center gap-1.5 pr-2 pl-1 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">${accountLogo(name, 18)}<span>${escapeHtml(name)}</span></span>`;
+        }
+
+        function renderAccountPicker(containerId, inputId, options) {
+            const selected = document.getElementById(inputId).value;
+            document.getElementById(containerId).innerHTML = options.map(name => {
+                const active = name === selected;
+                const classes = active
+                    ? 'border-amber-500 bg-amber-50 text-amber-950'
+                    : 'border-slate-200 text-slate-700 hover:bg-slate-50';
+                return `<button type="button" title="${escapeHtml(name)}" onclick="selectAccount('${inputId}','${containerId}','${name}')" class="flex w-full min-h-12 sm:min-h-0 items-center gap-2 px-2 py-3 sm:py-1.5 rounded-xl border text-left text-base sm:text-xs font-medium leading-tight ${classes}">${accountLogo(name, 22)}<span>${escapeHtml(name)}</span></button>`;
+            }).join('');
+        }
+
+        function selectAccount(inputId, containerId, name) {
+            document.getElementById(inputId).value = name;
+            renderAccountPicker(containerId, inputId, inputId === 'entry-source' ? SOURCE_ACCOUNTS : DEST_ACCOUNTS);
+        }
+
+        function normalizeSeed(list) {
+            return list.map(item => hydrateEntry(item, 1));
+        }
+
+        function applyLedgerUpgrade(list) {
+            const version = Number(localStorage.getItem('flowtrack_ledger_version') || '1');
+            const next = list.map(item => hydrateEntry(item, version));
+            return { list: next, changed: version < 3 };
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             initLucide();
@@ -396,7 +549,7 @@
 
         async function openVault(key) {
             cryptoKey = key;
-            seedTransactions = await decryptJson(AUTH_CONFIG.seedIv, AUTH_CONFIG.seedData);
+            seedTransactions = normalizeSeed(await decryptJson(AUTH_CONFIG.seedIv, AUTH_CONFIG.seedData));
 
             const vaultRaw = localStorage.getItem('flowtrack_vault');
             const legacyRaw = localStorage.getItem('flowtrack_transactions');
@@ -405,11 +558,16 @@
                 transactions = await decryptJson(parsed.iv, parsed.data);
             } else if (legacyRaw) {
                 transactions = JSON.parse(legacyRaw);
-                await saveTransactions();
             } else {
                 transactions = JSON.parse(JSON.stringify(seedTransactions));
+            }
+
+            const upgraded = applyLedgerUpgrade(transactions);
+            transactions = upgraded.list;
+            if (upgraded.changed || !vaultRaw) {
                 await saveTransactions();
             }
+            localStorage.setItem('flowtrack_ledger_version', '3');
 
             const rawKey = new Uint8Array(await crypto.subtle.exportKey('raw', cryptoKey));
             sessionStorage.setItem('flowtrack_session', bytesToB64(rawKey));
@@ -492,7 +650,11 @@
             }
         }
 
-        function signOut() {
+        async function signOut() {
+            if (undoTimer) clearTimeout(undoTimer);
+            const hadPendingDelete = Boolean(undoEntry);
+            undoEntry = null;
+            if (hadPendingDelete) await saveTransactions();
             cryptoKey = null;
             transactions = [];
             seedTransactions = null;
@@ -503,7 +665,13 @@
             }
             document.getElementById('kpi-cards').innerHTML = '';
             document.getElementById('transactions-table-body').innerHTML = '';
+            document.getElementById('mobile-ledger').innerHTML = '';
+            const toast = document.getElementById('undo-toast');
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
             document.getElementById('bank-breakdown-list').innerHTML = '';
+            document.getElementById('chart-legend').innerHTML = '';
+            document.getElementById('chart-center').innerHTML = '';
             document.getElementById('entry-count').textContent = '0 items';
             closeModal();
             const app = document.getElementById('app-shell');
@@ -526,20 +694,45 @@
 
         // Filtering logic
         function getFilteredTransactions() {
-            return transactions.filter(item => {
-                // Bank Filter matches either Source or Destination if filtered
-                const matchesBank = activeBankFilter === 'ALL' || item.source === activeBankFilter || item.destination === activeBankFilter;
-                
-                // Search query
-                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                     item.source.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                     item.destination.toLowerCase().includes(searchQuery.toLowerCase());
-                
-                // Type filter
+            const query = searchQuery.toLowerCase();
+            const filtered = transactions.filter(item => {
+                const source = bankSource(item);
+                const destination = bankDest(item);
+                const matchesBank = activeBankFilter === 'ALL' || source === activeBankFilter || destination === activeBankFilter;
+                const haystack = [item.title, source, destination, item.category, item.notes, item.date].join(' ').toLowerCase();
+                const matchesSearch = haystack.includes(query);
                 const matchesType = typeFilter === 'ALL' || item.type === typeFilter;
-
                 return matchesBank && matchesSearch && matchesType;
             });
+            const dir = sortDir === 'asc' ? 1 : -1;
+            return filtered.sort((a, b) => {
+                const value = (entry) => {
+                    if (sortKey === 'amount') return Math.abs(entry.amount);
+                    if (sortKey === 'source') return bankSource(entry);
+                    if (sortKey === 'category') return entry.category || '';
+                    return entry.date || '';
+                };
+                const left = value(a);
+                const right = value(b);
+                if (left < right) return -1 * dir;
+                if (left > right) return 1 * dir;
+                return 0;
+            });
+        }
+
+        function setSort(key) {
+            if (sortKey === key) {
+                sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortKey = key;
+                sortDir = key === 'source' || key === 'category' ? 'asc' : 'desc';
+            }
+            renderTable();
+        }
+
+        function sortMarker(key) {
+            if (sortKey !== key) return '';
+            return sortDir === 'asc' ? '↑' : '↓';
         }
 
         function renderApp() {
@@ -553,71 +746,38 @@
 
         function renderKPICards() {
             const container = document.getElementById('kpi-cards');
-            
-            // Calculate global totals
-            const totalIncome = transactions.filter(t => t.type === 'INCOME').reduce((acc, curr) => acc + curr.amount, 0);
-            const totalInvestments = transactions.filter(t => t.type === 'EXPENSE').reduce((acc, curr) => acc + curr.amount, 0);
-            
-            // Commerzbank Specifics
-            const cbIncome = transactions.filter(t => t.source === 'Commerzbank' && t.type === 'INCOME').reduce((acc, curr) => acc + curr.amount, 0);
-            const cbOutflow = transactions.filter(t => t.source === 'Commerzbank' && t.type === 'EXPENSE').reduce((acc, curr) => acc + curr.amount, 0);
-            const cbNetBalance = cbIncome - cbOutflow;
+            const totalIncome = sumWhere(isIncome);
+            const totalInvestments = sumWhere(isInvestment);
+            const totalExpenses = sumWhere(isExpense);
+            const savingsRate = totalIncome ? (totalInvestments / totalIncome) * 100 : 0;
+            const cbIn = sumWhere(item => (isIncome(item) && bankSource(item) === 'Commerzbank') || (isTransfer(item) && bankDest(item) === 'Commerzbank'));
+            const cbOut = sumWhere(item => bankSource(item) === 'Commerzbank' && !isIncome(item));
+            const liquid = cbIn - cbOut;
+            const card = 'bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow';
 
             container.innerHTML = `
-                <!-- Total Income Card -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Monthly Income</p>
-                        <h3 class="text-2xl font-bold text-slate-900 mt-1">€${totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
-                        <p class="text-xs text-emerald-600 mt-1 flex items-center gap-1 font-medium">
-                            <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i> Salary & Cash Inflow
-                        </p>
+                <div class="${card}">
+                    <div class="flex items-center justify-between gap-3">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Commerz Liquid</p>
+                        ${accountLogo('Commerzbank', 28)}
                     </div>
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                        <i data-lucide="trending-up" class="w-6 h-6"></i>
-                    </div>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">${formatEuro(liquid)}</h3>
+                    <p class="text-xs text-amber-600 font-medium mt-2">${savingsRate.toFixed(1)}% Savings Rate</p>
                 </div>
-
-                <!-- Total Investments -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Investments</p>
-                        <h3 class="text-2xl font-bold text-slate-900 mt-1">€${totalInvestments.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
-                        <p class="text-xs text-indigo-600 mt-1 font-medium">
-                            ${((totalInvestments/ (totalIncome || 1)) * 100).toFixed(1)}% Savings/Invest Rate
-                        </p>
-                    </div>
-                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                        <i data-lucide="pie-chart" class="w-6 h-6"></i>
-                    </div>
+                <div class="${card}">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Invested Capital</p>
+                    <h3 class="text-2xl font-bold text-slate-900 mt-1">${formatEuro(totalInvestments)}</h3>
+                    <p class="text-xs text-amber-600 font-medium mt-2">Investments ÷ income</p>
                 </div>
-
-                <!-- Commerzbank Outflow -->
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Commerzbank Debits</p>
-                        <h3 class="text-2xl font-bold text-slate-900 mt-1">-€${cbOutflow.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
-                        <p class="text-xs text-amber-600 mt-1 font-medium flex items-center gap-1">
-                            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i> Deductions & Transfers
-                        </p>
-                    </div>
-                    <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
-                        <i data-lucide="arrow-right-left" class="w-6 h-6"></i>
-                    </div>
+                <div class="${card}">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Income</p>
+                    <h3 class="text-2xl font-bold text-emerald-600 mt-1">${formatEuro(totalIncome)}</h3>
+                    <p class="text-xs text-emerald-600 font-medium mt-2">Salary and cash in</p>
                 </div>
-
-                <!-- Commerzbank Net Remaining Balance -->
-                <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-xl shadow-md flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-semibold text-indigo-200 uppercase tracking-wider">Commerzbank Net Left</p>
-                        <h3 class="text-2xl font-bold mt-1 text-white">€${cbNetBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</h3>
-                        <p class="text-xs text-indigo-300 mt-1 font-medium">
-                            Remaining after investments
-                        </p>
-                    </div>
-                    <div class="p-3 bg-white/10 text-white backdrop-blur-md rounded-xl">
-                        <i data-lucide="landmark" class="w-6 h-6"></i>
-                    </div>
+                <div class="${card}">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Expenses</p>
+                    <h3 class="text-2xl font-bold text-rose-600 mt-1">${formatEuro(totalExpenses)}</h3>
+                    <p class="text-xs text-rose-600 font-medium mt-2">Rent, bills and spending</p>
                 </div>
             `;
         }
@@ -626,17 +786,16 @@
             const container = document.getElementById('bank-filter-tabs');
             
             // Collect unique bank names
-            const banks = ['ALL', 'Commerzbank', 'Trade Republic', 'Scalable Capital'];
-
-            container.innerHTML = banks.map(bank => {
+            container.innerHTML = BANK_FILTERS.map(bank => {
                 const isActive = activeBankFilter === bank;
                 const label = bank === 'ALL' ? 'All Banks' : bank;
-                const activeClasses = 'bg-indigo-600 text-white shadow-sm';
+                const logo = bank === 'ALL' ? '' : accountLogo(bank, 18);
+                const activeClasses = 'bg-amber-500 text-white shadow-sm';
                 const inactiveClasses = 'bg-slate-100 text-slate-600 hover:bg-slate-200';
 
                 return `
-                    <button onclick="setBankFilter('${bank}')" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${isActive ? activeClasses : inactiveClasses}">
-                        ${label}
+                    <button type="button" onclick="setBankFilter('${bank}')" class="min-h-12 sm:min-h-0 px-3 py-3 sm:px-2.5 sm:py-1.5 rounded-xl text-sm sm:text-xs font-medium transition-colors whitespace-nowrap inline-flex items-center gap-1.5 ${isActive ? activeClasses : inactiveClasses}">
+                        ${logo}<span>${label}</span>
                     </button>
                 `;
             }).join('');
@@ -659,16 +818,43 @@
             renderTable();
         }
 
+        function entryVisual(item) {
+            if (isIncome(item)) return { sign: '+', amountClass: 'text-emerald-600 font-semibold', iconWrap: 'bg-emerald-50 text-emerald-600', icon: 'arrow-down-left' };
+            if (isExpense(item)) return { sign: '-', amountClass: 'text-rose-600 font-semibold', iconWrap: 'bg-rose-50 text-rose-600', icon: 'receipt' };
+            if (isTransfer(item)) return { sign: '', amountClass: 'text-slate-700 font-semibold', iconWrap: 'bg-slate-100 text-slate-600', icon: 'arrow-right-left' };
+            return { sign: '-', amountClass: 'text-amber-700 font-semibold', iconWrap: 'bg-amber-50 text-amber-600', icon: 'trending-up' };
+        }
+
+        function entryActions(id) {
+            return `
+                <button type="button" onclick="openModal('${id}')" class="min-h-12 min-w-12 inline-flex items-center justify-center text-slate-400 hover:text-amber-600 rounded-lg" title="Edit" aria-label="Edit">
+                    <i data-lucide="edit-2" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="duplicateEntry('${id}')" class="min-h-12 min-w-12 inline-flex items-center justify-center text-slate-400 hover:text-amber-600 rounded-lg" title="Duplicate" aria-label="Duplicate">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="deleteEntry('${id}')" class="min-h-12 min-w-12 inline-flex items-center justify-center text-slate-400 hover:text-rose-600 rounded-lg" title="Delete" aria-label="Delete">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            `;
+        }
+
         function renderTable() {
             const tableBody = document.getElementById('transactions-table-body');
+            const mobile = document.getElementById('mobile-ledger');
             const emptyState = document.getElementById('empty-state');
             const countBadge = document.getElementById('entry-count');
-            
+            ['date', 'category', 'source', 'amount'].forEach(key => {
+                const marker = document.getElementById('sort-' + key);
+                if (marker) marker.textContent = sortMarker(key);
+            });
+
             const list = getFilteredTransactions();
             countBadge.textContent = `${list.length} items`;
 
             if (list.length === 0) {
                 tableBody.innerHTML = '';
+                mobile.innerHTML = '';
                 emptyState.classList.remove('hidden');
                 return;
             }
@@ -676,159 +862,239 @@
             emptyState.classList.add('hidden');
 
             tableBody.innerHTML = list.map(item => {
-                const isIncome = item.type === 'INCOME';
-                const amountFormatted = `${isIncome ? '+' : '-'}€${item.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-                const amountClass = isIncome ? 'text-emerald-600 font-semibold' : 'text-slate-900 font-semibold';
-
+                const visual = entryVisual(item);
+                const amountText = `${visual.sign}${formatEuro(item.amount)}`;
                 return `
                     <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-4 py-3 text-slate-500 whitespace-nowrap">${escapeHtml(item.date)}</td>
                         <td class="px-4 py-3 font-medium text-slate-900">
                             <div class="flex items-center gap-2.5">
-                                <div class="p-1.5 rounded-lg ${isIncome ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
-                                    <i data-lucide="${isIncome ? 'arrow-down-left' : 'trending-up'}" class="w-4 h-4"></i>
+                                <div class="p-1.5 rounded-lg ${visual.iconWrap}">
+                                    <i data-lucide="${visual.icon}" class="w-4 h-4"></i>
                                 </div>
-                                <span>${escapeHtml(item.title)}</span>
+                                <span>${escapeHtml(item.title)}${item.isRecurring ? ' <span class="text-[10px] uppercase tracking-wide text-amber-600">Monthly</span>' : ''}</span>
                             </div>
                         </td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
-                                ${escapeHtml(item.source)}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700">
-                                ${escapeHtml(item.destination)}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-right ${amountClass}">
-                            ${amountFormatted}
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <div class="flex items-center justify-center space-x-1">
-                                <button onclick="openModal('${item.id}')" class="p-1 text-slate-400 hover:text-indigo-600 rounded hover:bg-slate-100 transition-colors" title="Edit">
-                                    <i data-lucide="edit-2" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="deleteEntry('${item.id}')" class="p-1 text-slate-400 hover:text-red-600 rounded hover:bg-slate-100 transition-colors" title="Delete">
-                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </td>
+                        <td class="px-4 py-3"><span class="inline-flex px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-800">${escapeHtml(item.category)}</span></td>
+                        <td class="px-4 py-3">${accountChip(bankSource(item))}</td>
+                        <td class="px-4 py-3">${accountChip(bankDest(item))}</td>
+                        <td class="px-4 py-3 text-right ${visual.amountClass}" ondblclick="startAmountEdit('${item.id}', event)" title="Double-click to edit the amount">${amountText}</td>
+                        <td class="px-4 py-3 text-center"><div class="flex items-center justify-center">${entryActions(item.id)}</div></td>
                     </tr>
+                `;
+            }).join('');
+
+            mobile.innerHTML = list.map(item => {
+                const visual = entryVisual(item);
+                const open = expandedIds.has(item.id);
+                return `
+                    <article class="p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="font-semibold text-slate-900">${escapeHtml(item.title)}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${escapeHtml(item.date)} · ${escapeHtml(item.category)}${item.isRecurring ? ' · Monthly' : ''}</p>
+                            </div>
+                            <button type="button" class="text-base ${visual.amountClass}" ondblclick="startAmountEdit('${item.id}', event)">${visual.sign}${formatEuro(item.amount)}</button>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-1.5">${accountChip(bankSource(item))}${accountChip(bankDest(item))}</div>
+                        <button type="button" onclick="toggleDetails('${item.id}')" class="min-h-12 mt-1 text-sm font-medium text-amber-700">${open ? 'Hide details' : 'Show details'}</button>
+                        <div class="${open ? '' : 'hidden'} text-sm text-slate-600 space-y-2">
+                            <p>From ${escapeHtml(bankSource(item))} to ${escapeHtml(bankDest(item))}</p>
+                            ${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}
+                            <div class="flex">${entryActions(item.id)}</div>
+                        </div>
+                    </article>
                 `;
             }).join('');
 
             initLucide();
         }
 
+        function toggleDetails(id) {
+            if (expandedIds.has(id)) expandedIds.delete(id);
+            else expandedIds.add(id);
+            renderTable();
+        }
+
+        function startAmountEdit(id, event) {
+            const host = event.currentTarget;
+            const item = transactions.find(entry => entry.id === id);
+            if (!item || host.querySelector('input')) return;
+            host.innerHTML = `<input type="number" step="0.01" min="0.01" value="${Math.abs(item.amount)}" class="w-28 min-h-12 px-2 py-2 border border-amber-300 rounded-xl text-base text-right text-slate-900" aria-label="Amount">`;
+            const input = host.querySelector('input');
+            input.focus();
+            input.select();
+            input.addEventListener('keydown', (keyEvent) => {
+                if (keyEvent.key === 'Enter') commitAmountEdit(id, input);
+                if (keyEvent.key === 'Escape') renderTable();
+            });
+            input.addEventListener('blur', () => commitAmountEdit(id, input));
+        }
+
+        async function commitAmountEdit(id, input) {
+            if (amountEditLock || !input.isConnected) return;
+            amountEditLock = true;
+            const amount = Math.abs(parseFloat(input.value));
+            const item = transactions.find(entry => entry.id === id);
+            if (item && amount > 0 && amount !== item.amount) {
+                item.amount = amount;
+                await saveTransactions();
+                renderApp();
+            } else {
+                renderTable();
+            }
+            amountEditLock = false;
+        }
+
         function renderChart() {
-            const ctx = document.getElementById('allocationChart').getContext('2d');
-            
-            // Aggregate expenses by title
-            const expenses = transactions.filter(t => t.type === 'EXPENSE');
-            const labels = expenses.map(e => e.title);
-            const data = expenses.map(e => e.amount);
+            const legend = document.getElementById('chart-legend');
+            const center = document.getElementById('chart-center');
+            const slices = [
+                { label: 'Income', amount: sumWhere(isIncome), color: '#059669' },
+                { label: 'Investment', amount: sumWhere(isInvestment), color: '#d97706' },
+                { label: 'Expenses', amount: sumWhere(isExpense), color: '#e11d48' }
+            ];
+            const total = slices.reduce((sum, slice) => sum + slice.amount, 0);
+            const net = slices[0].amount - slices[1].amount - slices[2].amount;
+
+            legend.innerHTML = slices.map(slice => {
+                const share = total ? (slice.amount / total) * 100 : 0;
+                return `
+                    <div class="flex items-center justify-between gap-3 text-sm">
+                        <span class="inline-flex items-center gap-2 text-slate-700">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background:${slice.color}"></span>
+                            ${slice.label}
+                        </span>
+                        <span class="font-medium text-slate-900">${formatEuro(slice.amount)} <span class="text-xs font-normal text-slate-400">${share.toFixed(0)}%</span></span>
+                    </div>
+                `;
+            }).join('');
+
+            center.innerHTML = `
+                <span class="text-[10px] uppercase tracking-wider text-slate-400">Net</span>
+                <span class="text-sm font-bold text-slate-900">${formatEuro(net)}</span>
+            `;
 
             if (chartInstance) {
                 chartInstance.destroy();
+                chartInstance = null;
             }
+            if (!total) return;
 
-            const palette = [
-                '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', 
-                '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#84cc16', 
-                '#3b82f6', '#a855f7', '#f97316'
-            ];
-
-            chartInstance = new Chart(ctx, {
+            chartInstance = new Chart(document.getElementById('allocationChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
+                    labels: slices.map(slice => slice.label),
                     datasets: [{
-                        data: data,
-                        backgroundColor: palette.slice(0, labels.length),
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        data: slices.map(slice => slice.amount),
+                        backgroundColor: slices.map(slice => slice.color),
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return ` ${context.label}: €${context.raw}`;
+                                    const share = total ? (context.raw / total) * 100 : 0;
+                                    return ` ${context.label}: ${formatEuro(context.raw)} (${share.toFixed(1)}%)`;
                                 }
                             }
                         }
                     },
-                    cutout: '70%'
+                    cutout: '68%'
                 }
             });
         }
 
         function renderBankBreakdowns() {
             const container = document.getElementById('bank-breakdown-list');
-            const banks = ['Commerzbank', 'Trade Republic', 'Scalable Capital'];
-
+            const banks = SOURCE_ACCOUNTS.filter(bank => bank !== 'Other Bank' && (
+                ['Commerzbank', 'Trade Republic', 'Scalable Capital'].includes(bank) ||
+                transactions.some(item => bankSource(item) === bank || bankDest(item) === bank)
+            ));
             container.innerHTML = banks.map(bank => {
-                const bankOutflow = transactions
-                    .filter(t => t.source === bank && t.type === 'EXPENSE')
-                    .reduce((sum, t) => sum + t.amount, 0);
-
-                const bankInflow = transactions
-                    .filter(t => t.source === bank && t.type === 'INCOME')
-                    .reduce((sum, t) => sum + t.amount, 0);
+                const invested = sumWhere(item => bankSource(item) === bank && isInvestment(item));
+                const spent = sumWhere(item => bankSource(item) === bank && isExpense(item));
+                const inflow = sumWhere(item => (bankSource(item) === bank && isIncome(item)) || (bankDest(item) === bank && isTransfer(item)));
+                const outflow = invested + spent + sumWhere(item => bankSource(item) === bank && isTransfer(item));
 
                 return `
-                    <div class="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between">
-                        <div>
-                            <p class="font-medium text-xs text-slate-800">${bank}</p>
-                            <p class="text-[11px] text-slate-500">
-                                ${bankInflow > 0 ? `In: €${bankInflow} | ` : ''}Out: €${bankOutflow}
-                            </p>
+                    <div class="p-3 rounded-lg border border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 min-w-0">
+                            ${accountLogo(bank, 28)}
+                            <div class="min-w-0">
+                                <p class="font-medium text-xs text-slate-800 truncate">${bank}</p>
+                                <p class="text-[11px] text-slate-500">
+                                    ${inflow > 0 ? `In ${formatEuro(inflow)} · ` : ''}Invest ${formatEuro(invested)} · Spend ${formatEuro(spent)}
+                                </p>
+                            </div>
                         </div>
-                        <span class="text-xs font-semibold text-slate-700">
-                            -€${bankOutflow.toLocaleString()}
-                        </span>
+                        <span class="text-xs font-semibold text-slate-700 shrink-0">-${formatEuro(outflow)}</span>
                     </div>
                 `;
             }).join('');
         }
 
         // Modal operations
-        function openModal(id = null) {
+        function duplicateEntry(id) {
+            const item = transactions.find(entry => entry.id === id);
+            if (item) openModal(null, item);
+        }
+
+        function fillEntryForm(item, asCopy) {
+            document.getElementById('entry-id').value = asCopy ? '' : item.id;
+            document.getElementById('entry-title').value = item.title;
+            document.getElementById('entry-amount').value = Math.abs(item.amount);
+            document.getElementById('entry-type').value = canonicalType(item.type, 3);
+            document.getElementById('entry-date').value = asCopy ? todayISO() : (item.date || todayISO());
+            document.getElementById('entry-category').value = item.category || inferCategory(item.title, canonicalType(item.type, 3));
+            document.getElementById('entry-recurring').checked = Boolean(item.isRecurring);
+            document.getElementById('entry-notes').value = item.notes || '';
+            document.getElementById('entry-source').value = bankSource(item);
+            document.getElementById('entry-destination').value = bankDest(item);
+        }
+
+        function openModal(id = null, copySource = null) {
             const modal = document.getElementById('entryModal');
             const modalContainer = document.getElementById('modalContainer');
             const form = document.getElementById('entryForm');
             const titleEl = document.getElementById('modalTitle');
 
             form.reset();
+            document.getElementById('entry-date').value = todayISO();
+            document.getElementById('entry-source').value = 'Commerzbank';
+            document.getElementById('entry-destination').value = 'Direct/Other';
 
             if (id) {
-                const item = transactions.find(t => t.id === id);
+                const item = transactions.find(entry => entry.id === id);
                 if (item) {
-                    document.getElementById('entry-id').value = item.id;
-                    document.getElementById('entry-title').value = item.title;
-                    document.getElementById('entry-amount').value = item.amount;
-                    document.getElementById('entry-type').value = item.type;
-                    document.getElementById('entry-source').value = item.source;
-                    document.getElementById('entry-destination').value = item.destination;
-                    titleEl.innerHTML = `<i data-lucide="edit-2" class="w-5 h-5 text-indigo-600"></i> Edit Entry`;
+                    fillEntryForm(item, false);
+                    titleEl.innerHTML = `<i data-lucide="edit-2" class="w-5 h-5 text-amber-600"></i> Edit Entry`;
                 }
+            } else if (copySource) {
+                fillEntryForm(copySource, true);
+                titleEl.innerHTML = `<i data-lucide="copy" class="w-5 h-5 text-amber-600"></i> Duplicate Entry`;
             } else {
                 document.getElementById('entry-id').value = '';
-                titleEl.innerHTML = `<i data-lucide="plus-circle" class="w-5 h-5 text-indigo-600"></i> Add Entry`;
+                titleEl.innerHTML = `<i data-lucide="plus-circle" class="w-5 h-5 text-amber-600"></i> New Entry`;
             }
 
+            renderAccountPicker('source-picker', 'entry-source', SOURCE_ACCOUNTS);
+            renderAccountPicker('destination-picker', 'entry-destination', DEST_ACCOUNTS);
+            toggleTypeFields();
             initLucide();
             modal.classList.remove('hidden');
+            modal.classList.add('flex');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
-                modalContainer.classList.remove('scale-95');
-                modalContainer.classList.add('scale-100');
+                modalContainer.classList.remove('translate-y-4', 'sm:scale-95');
+                modalContainer.classList.add('translate-y-0', 'sm:scale-100');
             }, 10);
         }
 
@@ -836,42 +1102,61 @@
             const modal = document.getElementById('entryModal');
             const modalContainer = document.getElementById('modalContainer');
 
-            modalContainer.classList.remove('scale-100');
-            modalContainer.classList.add('scale-95');
+            modalContainer.classList.remove('translate-y-0', 'sm:scale-100');
+            modalContainer.classList.add('translate-y-4', 'sm:scale-95');
             modal.classList.add('opacity-0');
 
             setTimeout(() => {
                 modal.classList.add('hidden');
+                modal.classList.remove('flex');
             }, 200);
+        }
+
+        function toggleTypeFields() {
+            const type = document.getElementById('entry-type').value;
+            const destinationLabel = document.getElementById('destination-label');
+            const title = document.getElementById('entry-title');
+            if (type === 'FIXED_EXPENSE') {
+                destinationLabel.textContent = 'Paid to';
+                title.placeholder = 'e.g. Rent, groceries, utilities';
+            } else if (type === 'INVESTMENT_OUTFLOW') {
+                destinationLabel.textContent = 'Broker / Destination';
+                title.placeholder = 'e.g. Index fund, shares';
+            } else if (type === 'INTERNAL_TRANSFER') {
+                destinationLabel.textContent = 'Transfer to';
+                title.placeholder = 'e.g. Move to broker';
+            } else {
+                destinationLabel.textContent = 'Deposited to';
+                title.placeholder = 'e.g. Salary';
+            }
         }
 
         async function handleFormSubmit(e) {
             e.preventDefault();
 
             const id = document.getElementById('entry-id').value;
-            const title = document.getElementById('entry-title').value.trim();
-            const amount = parseFloat(document.getElementById('entry-amount').value);
-            const type = document.getElementById('entry-type').value;
             const source = document.getElementById('entry-source').value;
             const destination = document.getElementById('entry-destination').value;
+            const entry = {
+                id: id || (window.crypto.randomUUID ? crypto.randomUUID() : Date.now().toString()),
+                date: document.getElementById('entry-date').value,
+                title: document.getElementById('entry-title').value.trim(),
+                type: document.getElementById('entry-type').value,
+                amount: Math.abs(parseFloat(document.getElementById('entry-amount').value)),
+                sourceBank: source,
+                destinationBank: destination,
+                source,
+                destination,
+                category: document.getElementById('entry-category').value,
+                isRecurring: document.getElementById('entry-recurring').checked,
+                notes: document.getElementById('entry-notes').value.trim()
+            };
 
             if (id) {
-                // Update
-                const index = transactions.findIndex(t => t.id === id);
-                if (index !== -1) {
-                    transactions[index] = { id, title, amount, type, source, destination };
-                }
+                const index = transactions.findIndex(item => item.id === id);
+                if (index !== -1) transactions[index] = entry;
             } else {
-                // Create
-                const newItem = {
-                    id: Date.now().toString(),
-                    title,
-                    amount,
-                    type,
-                    source,
-                    destination
-                };
-                transactions.unshift(newItem);
+                transactions.unshift(entry);
             }
 
             await saveTransactions();
@@ -880,8 +1165,39 @@
         }
 
         async function deleteEntry(id) {
-            transactions = transactions.filter(t => t.id !== id);
-            await saveTransactions();
+            if (undoEntry) {
+                clearTimeout(undoTimer);
+                undoTimer = null;
+                undoEntry = null;
+                await saveTransactions();
+            }
+            const index = transactions.findIndex(item => item.id === id);
+            if (index === -1) return;
+            undoEntry = { index, item: transactions[index] };
+            transactions.splice(index, 1);
+            renderApp();
+            const toast = document.getElementById('undo-toast');
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            undoTimer = setTimeout(async () => {
+                undoEntry = null;
+                undoTimer = null;
+                const pendingToast = document.getElementById('undo-toast');
+                pendingToast.classList.add('hidden');
+                pendingToast.classList.remove('flex');
+                await saveTransactions();
+            }, 5000);
+        }
+
+        function undoDelete() {
+            if (!undoEntry) return;
+            clearTimeout(undoTimer);
+            undoTimer = null;
+            transactions.splice(Math.min(undoEntry.index, transactions.length), 0, undoEntry.item);
+            undoEntry = null;
+            const toast = document.getElementById('undo-toast');
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
             renderApp();
         }
 
