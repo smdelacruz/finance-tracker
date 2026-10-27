@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -60,6 +61,7 @@
                     <button type="button" id="new-entry" class="hidden sm:inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-xl text-sm shadow-sm transition min-h-12">+ New Entry</button>
                 </div>
             </div>
+            <p id="sync-note" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 text-sm text-amber-900 bg-amber-50 border-t border-amber-200" role="status"></p>
         </header>
 
         <div class="sticky top-16 z-30 bg-slate-50/95 backdrop-blur border-b border-slate-200">
@@ -206,6 +208,12 @@
         const AUTH_PASSWORD = 'ooobysha2026';
         const STORAGE_KEY = 'wealthtracker_entries';
         const AUTH_KEY = 'is_authenticated';
+        const SUPABASE_URL = 'https://bwdglovgnibxcwatfqvz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3ZGdsb3ZnbmlieGN3YXRmcXZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzQ1ODQsImV4cCI6MjEwODYxMDU4NH0.AaTXXWxZgRZdgeIle2JOSsnKs_irOmfte5-363SoE90';
+        const supabaseClient = window.supabase
+            ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+            : null;
+        const TABLE = 'entries';
         const ACCOUNTS = ['Commerzbank', 'Trade Republic', 'Scalable Capital', 'Deutsche Bank', 'DKB', 'N26', 'Other'];
         const DESTINATIONS = ACCOUNTS.concat('Direct/Other');
         const DIRECT_BROKERS = ['Trade Republic', 'Scalable Capital'];
@@ -226,6 +234,8 @@
         let undoEntry = null;
         let formSource = 'Commerzbank';
         let formDestination = 'Direct/Other';
+        let ledgerChannel = null;
+        let reloadTimer = null;
 
         const SEED = [
             ['Salary', 3600, 'INCOME', 'Commerzbank', 'Commerzbank', 'Salary', 1, true],
@@ -327,19 +337,134 @@
             return SEED.map(parts => createEntry(parts, 2026, 10));
         }
 
-        function loadLedger() {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) {
-                transactions = seedLedger();
-                saveLedger();
+        function readLocal() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+                return Array.isArray(parsed) ? parsed.map(normalizeEntry) : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function cacheLocal() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        }
+
+        function toRow(entry) {
+            return {
+                id: entry.id,
+                series_id: entry.seriesId || '',
+                date: entry.date,
+                day: entry.day,
+                title: entry.title,
+                type: entry.type,
+                amount: entry.amount,
+                source_bank: entry.sourceBank,
+                destination_bank: entry.destinationBank || '',
+                category: entry.category || '',
+                is_recurring: Boolean(entry.isRecurring),
+                status: entry.status,
+                notes: entry.notes || ''
+            };
+        }
+
+        function fromRow(row) {
+            return normalizeEntry({
+                id: row.id,
+                seriesId: row.series_id,
+                date: row.date,
+                day: row.day,
+                title: row.title,
+                type: row.type,
+                amount: row.amount,
+                sourceBank: row.source_bank,
+                destinationBank: row.destination_bank,
+                category: row.category,
+                isRecurring: row.is_recurring,
+                status: row.status,
+                notes: row.notes
+            });
+        }
+
+        function showSyncError(error) {
+            const note = document.getElementById('sync-note');
+            const missing = error && (error.code === 'PGRST205' || /could not find the table/i.test(error.message || ''));
+            note.textContent = missing
+                ? 'The cloud ledger is not created yet. Run the entries SQL in the Supabase SQL editor, then reload.'
+                : 'Could not sync with Supabase. ' + (error && error.message ? error.message : 'Check your connection.');
+            note.classList.remove('hidden');
+        }
+
+        function clearSyncError() {
+            document.getElementById('sync-note').classList.add('hidden');
+        }
+
+        async function upsertEntries(entries) {
+            if (!entries.length || !supabaseClient) return;
+            const { error } = await supabaseClient.from(TABLE).upsert(entries.map(toRow));
+            if (error) showSyncError(error);
+            else {
+                clearSyncError();
+                cacheLocal();
+            }
+        }
+
+        async function deleteRemote(id) {
+            if (!supabaseClient) return;
+            const { error } = await supabaseClient.from(TABLE).delete().eq('id', id);
+            if (error) showSyncError(error);
+            else {
+                clearSyncError();
+                cacheLocal();
+            }
+        }
+
+        async function loadLedger() {
+            if (!supabaseClient) {
+                showSyncError({ message: 'The Supabase library did not load.' });
+                transactions = readLocal();
                 return;
             }
-            try {
-                const parsed = JSON.parse(raw);
-                transactions = Array.isArray(parsed) ? parsed.map(normalizeEntry) : seedLedger();
-            } catch (error) {
-                transactions = seedLedger();
+            const { data, error } = await supabaseClient.from(TABLE).select('*').order('date');
+            if (error) {
+                showSyncError(error);
+                transactions = readLocal();
+                return;
             }
+            clearSyncError();
+            if (!data.length) {
+                const local = readLocal();
+                transactions = local.length ? local : seedLedger();
+                await upsertEntries(transactions);
+                return;
+            }
+            transactions = data.map(fromRow);
+            cacheLocal();
+        }
+
+        async function refreshFromCloud() {
+            if (!supabaseClient || undoEntry) return;
+            if (!document.getElementById('entry-modal').classList.contains('hidden')) return;
+            if (document.querySelector('#ledger-body input, #mobile-ledger input')) return;
+            const { data, error } = await supabaseClient.from(TABLE).select('*').order('date');
+            if (error) {
+                showSyncError(error);
+                return;
+            }
+            transactions = data.map(fromRow);
+            cacheLocal();
+            clearSyncError();
+            render();
+        }
+
+        function watchLedger() {
+            if (!supabaseClient || ledgerChannel) return;
+            ledgerChannel = supabaseClient.channel('entries-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => {
+                    clearTimeout(reloadTimer);
+                    reloadTimer = setTimeout(refreshFromCloud, 400);
+                })
+                .subscribe();
         }
 
         function normalizeEntry(item) {
@@ -363,18 +488,14 @@
             };
         }
 
-        function saveLedger() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-        }
-
-        function ensureMonth(key) {
+        async function ensureMonth(key) {
             const [year, month] = key.split('-').map(Number);
             const templates = new Map();
             transactions.filter(item => item.isRecurring && item.seriesId).forEach(item => {
                 const current = templates.get(item.seriesId);
                 if (!current || item.date < current.date) templates.set(item.seriesId, item);
             });
-            let changed = false;
+            const added = [];
             templates.forEach(template => {
                 if (key < template.date.slice(0, 7)) return;
                 if (transactions.some(item => item.seriesId === template.seriesId && item.date.startsWith(key))) return;
@@ -383,17 +504,18 @@
                 const today = new Date();
                 const entryDate = new Date(year, month - 1, Number(date.slice(8, 10)));
                 const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                transactions.push({
+                const copy = {
                     ...template,
                     id: crypto.randomUUID(),
                     date,
                     day: Number(date.slice(8, 10)),
                     status: entryDate < startOfToday ? 'Cleared' : 'Scheduled',
                     isRecurring: true
-                });
-                changed = true;
+                };
+                transactions.push(copy);
+                added.push(copy);
             });
-            if (changed) saveLedger();
+            if (added.length) await upsertEntries(added);
         }
 
         function monthEntries() {
@@ -669,7 +791,7 @@
             paint('destination-picker', formDestination, DESTINATIONS, 'destination');
         }
 
-        function handleSubmit(event) {
+        async function handleSubmit(event) {
             event.preventDefault();
             const id = document.getElementById('entry-id').value;
             const type = document.getElementById('entry-type').value;
@@ -699,26 +821,34 @@
                 transactions.push(entry);
             }
             selectedMonth = date.slice(0, 7);
-            saveLedger();
-            ensureMonth(selectedMonth);
+            await upsertEntries([entry]);
+            await ensureMonth(selectedMonth);
             closeModal();
             render();
         }
 
-        function cycleStatus(id) {
+        async function cycleStatus(id) {
             const item = transactions.find(entry => entry.id === id);
             if (!item) return;
             item.status = STATUSES[(STATUSES.indexOf(item.status) + 1) % STATUSES.length];
-            saveLedger();
             render();
+            await upsertEntries([item]);
         }
 
-        function deleteEntry(id) {
-            if (undoEntry) {
-                clearTimeout(undoTimer);
-                undoEntry = null;
-                saveLedger();
-            }
+        async function commitPendingDelete() {
+            if (!undoEntry) return;
+            const id = undoEntry.item.id;
+            clearTimeout(undoTimer);
+            undoTimer = null;
+            undoEntry = null;
+            const toast = document.getElementById('undo-toast');
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
+            await deleteRemote(id);
+        }
+
+        async function deleteEntry(id) {
+            if (undoEntry) await commitPendingDelete();
             const index = transactions.findIndex(item => item.id === id);
             if (index < 0) return;
             undoEntry = { index, item: transactions[index] };
@@ -728,11 +858,7 @@
             toast.classList.remove('hidden');
             toast.classList.add('flex');
             undoTimer = setTimeout(() => {
-                undoEntry = null;
-                undoTimer = null;
-                toast.classList.add('hidden');
-                toast.classList.remove('flex');
-                saveLedger();
+                commitPendingDelete();
             }, 5000);
         }
 
@@ -760,8 +886,7 @@
                 const amount = Math.abs(parseFloat(input.value));
                 if (amount > 0) {
                     item.amount = item.type === 'INCOME' ? amount : -amount;
-                    saveLedger();
-                    render();
+                    upsertEntries([item]).then(() => render());
                 } else {
                     renderLedger();
                 }
@@ -783,10 +908,12 @@
             if (action.dataset.action === 'status') cycleStatus(id);
         }
 
-        function enterApp() {
-            loadLedger();
-            ensureMonth(selectedMonth);
+        async function enterApp() {
             showApp();
+            document.getElementById('list-title').textContent = 'Loading…';
+            await loadLedger();
+            await ensureMonth(selectedMonth);
+            watchLedger();
             render();
         }
 
@@ -807,19 +934,21 @@
             enterApp();
         });
 
-        document.getElementById('sign-out').addEventListener('click', () => {
-            if (undoTimer) clearTimeout(undoTimer);
-            if (undoEntry) saveLedger();
-            undoEntry = null;
+        document.getElementById('sign-out').addEventListener('click', async () => {
+            await commitPendingDelete();
+            if (ledgerChannel && supabaseClient) {
+                supabaseClient.removeChannel(ledgerChannel);
+                ledgerChannel = null;
+            }
             localStorage.removeItem(AUTH_KEY);
             showLogin();
         });
 
-        document.getElementById('month-bar').addEventListener('click', event => {
+        document.getElementById('month-bar').addEventListener('click', async event => {
             const button = event.target.closest('[data-month]');
             if (!button) return;
             selectedMonth = button.dataset.month;
-            ensureMonth(selectedMonth);
+            await ensureMonth(selectedMonth);
             render();
         });
 
