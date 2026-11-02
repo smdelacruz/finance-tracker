@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Australia trip</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #1c1917;
+            --muted: #78716c;
+            --line: #e7e5e4;
+            --paper: #fafaf9;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--white);
+            color: var(--ink);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.4;
+        }
+
+        main {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+            letter-spacing: -0.03em;
+        }
+
+        header p,
+        #countdown {
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+
+        .shares {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 28px 0 8px;
+        }
+
+        .shares article {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px 16px;
+            background: var(--paper);
+        }
+
+        .who-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .shares .who-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .shares strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 22px;
+            letter-spacing: -0.02em;
+        }
+
+        .booked-total {
+            margin: 12px 0 0;
+            font-size: 14px;
+        }
+
+        .booked-total strong { font-size: 16px; }
+
+        .note {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .actions button,
+        #add-form button {
+            min-height: 44px;
+            padding: 0 14px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: var(--white);
+            color: var(--ink);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #toggle-add,
+        #add-form button {
+            background: var(--ink);
+            color: var(--white);
+            border-color: var(--ink);
+        }
+
+        #add-form {
+            display: none;
+            margin-top: 12px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            gap: 12px;
+        }
+
+        #add-form.is-open { display: grid; }
+
+        #add-form label,
+        .choices legend {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        #add-form .field {
+            display: grid;
+            gap: 4px;
+        }
+
+        #add-form input[type="text"],
+        #add-form input[type="number"] {
+            min-height: 44px;
+            padding: 8px 10px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            font: inherit;
+            font-weight: 400;
+        }
+
+        .choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            border: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .choices legend {
+            width: 100%;
+            padding: 0;
+        }
+
+        .choices label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 44px;
+            font-weight: 500;
+        }
+
+        #add-error {
+            margin: 0;
+            color: #9f1239;
+            font-size: 13px;
+        }
+
+        #summary-box {
+            margin: 8px 0 0;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--paper);
+            color: var(--ink);
+            font: inherit;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+
+        .table-wrap {
+            margin-top: 28px;
+            overflow-x: auto;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            text-align: right;
+            border-bottom: 1px solid var(--line);
+            white-space: nowrap;
+        }
+
+        th:first-child,
+        td:first-child,
+        th:nth-child(2),
+        td:nth-child(2) {
+            text-align: left;
+        }
+
+        thead th {
+            background: var(--paper);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        tbody tr:last-child td { border-bottom: 0; }
+
+        .item-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        tr.open td { color: var(--muted); }
+        tr.open .item-label { font-weight: 500; }
+
+        tfoot td {
+            background: var(--paper);
+            font-weight: 700;
+            border-bottom: 0;
+            border-top: 1px solid var(--line);
+        }
+
+        .status { font-weight: 500; }
+
+        button.remove {
+            margin-left: 8px;
+            padding: 0;
+            border: 0;
+            background: none;
+            color: var(--muted);
+            font: inherit;
+            font-weight: 500;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .phone-list {
+            display: none;
+            list-style: none;
+            margin: 24px 0 0;
+            padding: 0;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .phone-list li {
+            padding: 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .phone-list li:last-child { border-bottom: 0; }
+
+        .phone-list .top {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+        }
+
+        .phone-list .item-label {
+            font-size: 18px;
+            line-height: 1.3;
+            white-space: normal;
+        }
+
+        .phone-list .status {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .phone-list .when {
+            margin: 4px 0 12px;
+            color: #44403c;
+            font-size: 16px;
+        }
+
+        .phone-list .who {
+            display: grid;
+            gap: 0;
+        }
+
+        .phone-list .who span {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 40px;
+            padding-top: 8px;
+            margin-top: 8px;
+            border-top: 1px solid var(--line);
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .phone-list .who em {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 16px;
+            color: #44403c;
+        }
+
+        .phone-list li.open,
+        .phone-list li.open .item-label { color: #57534e; font-weight: 600; }
+
+        .phone-list li.total { background: var(--paper); }
+
+        .phone-list button.remove {
+            display: inline-flex;
+            align-items: center;
+            min-height: 40px;
+            margin-left: 12px;
+            font-size: 16px;
+        }
+
+        svg { display: block; flex: none; }
+        .shares svg { width: 22px; height: 22px; }
+
+        @media (max-width: 900px) {
+            body { font-size: 16px; }
+            main {
+                padding: 20px 16px 56px;
+                padding-left: max(16px, env(safe-area-inset-left));
+                padding-right: max(16px, env(safe-area-inset-right));
+            }
+            header h1 { font-size: 30px; }
+            header p, #countdown, .note { font-size: 15px; color: #44403c; }
+            .shares { grid-template-columns: 1fr; gap: 8px; }
+            .shares article {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+            .shares .who-label { font-size: 16px; }
+            .shares strong { margin-top: 0; font-size: 22px; }
+            .booked-total { font-size: 16px; }
+            .booked-total strong { font-size: 18px; }
+            .actions { flex-direction: column; }
+            .actions button, #add-form button { width: 100%; }
+            #add-form input[type="text"],
+            #add-form input[type="number"] { font-size: 16px; }
+            .table-wrap { display: none; }
+            .phone-list { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Australia</h1>
+            <p>27 November 2026 – 8 January 2027</p>
+            <p id="countdown"></p>
+        </header>
+
+        <section class="shares" id="shares" aria-label="Amount per person so far"></section>
+        <p class="booked-total" id="booked-total"></p>
+        <p class="note">Shared costs are split equally. Items that are not booked yet are listed below and are not included above.</p>
+
+        <div class="actions">
+            <button type="button" id="copy-summary">Copy summary</button>
+            <button type="button" id="toggle-add">Add a cost</button>
+        </div>
+        <p class="note" id="copy-note" hidden></p>
+        <pre id="summary-box" hidden></pre>
+
+        <form id="add-form">
+            <div class="field">
+                <label for="add-item">What</label>
+                <input type="text" id="add-item" maxlength="80" placeholder="Hotel, Melbourne" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="add-when">When</label>
+                <input type="text" id="add-when" maxlength="40" placeholder="2–5 Dec" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="add-amount">Amount (€)</label>
+                <input type="number" id="add-amount" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
+            </div>
+            <fieldset class="choices">
+                <legend>Who shares it</legend>
+                <label><input type="checkbox" name="who" value="Me"> Me</label>
+                <label><input type="checkbox" name="who" value="Mom"> Mom</label>
+                <label><input type="checkbox" name="who" value="Lola"> Lola</label>
+            </fieldset>
+            <fieldset class="choices">
+                <legend>Type</legend>
+                <label><input type="radio" name="kind" value="flight" checked> Flight</label>
+                <label><input type="radio" name="kind" value="hotel"> Hotel</label>
+            </fieldset>
+            <p id="add-error" hidden></p>
+            <button type="submit">Add to the list</button>
+            <p class="note">Saved on this phone only. Another phone opening the link will not see costs added here.</p>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>When</th>
+                        <th>Total</th>
+                        <th id="head-Me"></th>
+                        <th id="head-Mom"></th>
+                        <th id="head-Lola"></th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="rows"></tbody>
+                <tfoot>
+                    <tr id="foot"></tr>
+                </tfoot>
+            </table>
+        </div>
+        <ul class="phone-list" id="phone-list"></ul>
+        <p class="note">Manila to Brisbane is split three ways. The extra cent is on Lola so the shares add up to €1,345.00.</p>
+    </main>
+
+    <script>
+        const PEOPLE = ['Me', 'Mom', 'Lola'];
+        const STORAGE_KEY = 'australia-trip-added';
+
+        const BASE = [
+            { item: 'London → Berlin', when: '27 Nov – 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight' },
+            { item: 'Berlin ↔ Manila', when: '27 Nov – 7 Jan', total: 2808.56, who: ['Me', 'Mom'], status: 'Booked', kind: 'flight' },
+            { item: 'Hotel, Manila', when: '28–29 Nov', total: null, who: [], status: 'Not booked', kind: 'hotel' },
+            { item: 'Hotel, Manila', when: '29–30 Nov', total: 0, who: [], status: 'Free, Sir Sam', kind: 'hotel' },
+            { item: 'Manila → Brisbane', when: '30 Nov', total: 1345, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight' },
+            { item: 'Hotel, Brisbane', when: '30 Nov – 1 Dec', total: null, who: [], status: 'Not booked', kind: 'hotel' },
+            { item: 'Melbourne → Manila', when: 'Date not set', total: null, who: [], status: 'Not booked', kind: 'flight' }
+        ];
+
+        let added = loadAdded();
+        let totals = { Me: 0, Mom: 0, Lola: 0, all: 0 };
+        let rows = [];
+
+        function icon(name) {
+            const box = 'viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"';
+            const people = {
+                Me: '<circle cx="12" cy="7.4" r="3.2"/><path d="M5.1 20.2c1-3.7 3.5-5.4 6.9-5.4s5.9 1.7 6.9 5.4c.2.6-.3 1.1-.9 1.1H6c-.6 0-1.1-.5-.9-1.1z"/>',
+                Mom: '<path d="M6.4 10.4C6.8 5.6 8.8 3.6 12 3.6s5.2 2 5.6 6.8c-1.5-1.6-3.4-2.4-5.6-2.4s-4.1.8-5.6 2.4z"/><circle cx="12" cy="9.2" r="2.8"/><path d="M5.3 20.2c.9-3.5 3.3-5.1 6.7-5.1s5.8 1.6 6.7 5.1c.2.6-.3 1.1-.9 1.1H6.2c-.6 0-1.1-.5-.9-1.1z"/>',
+                Lola: '<circle cx="12" cy="3.2" r="1.9"/><circle cx="12" cy="8.8" r="3"/><path d="M5.3 20.3c.9-3.5 3.3-5.1 6.7-5.1s5.8 1.6 6.7 5.1c.2.6-.3 1.1-.9 1.1H6.2c-.6 0-1.1-.5-.9-1.1z"/>'
+            };
+            if (people[name]) {
+                return '<svg ' + box + ' fill="currentColor">' + people[name] + '</svg>';
+            }
+            const strokes = {
+                flight: '<path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>',
+                hotel: '<path d="M3 19V9"/><path d="M3 14h18v5"/><path d="M21 19v-5"/><path d="M7 14v-1.2A1.8 1.8 0 0 1 8.8 11h6.4A1.8 1.8 0 0 1 17 12.8V14"/>'
+            };
+            return '<svg ' + box + ' fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + strokes[name] + '</svg>';
+        }
+
+        function personLabel(name) {
+            return '<span class="who-label">' + icon(name) + '<span>' + name + '</span></span>';
+        }
+
+        function money(amount) {
+            return '€' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function escapeHtml(text) {
+            return String(text ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function split(total, who) {
+            const shares = { Me: null, Mom: null, Lola: null };
+            if (!who.length || total === null) return shares;
+            const cents = Math.round(total * 100);
+            const base = Math.floor(cents / who.length);
+            const remainder = cents - base * who.length;
+            who.forEach(function (name, index) {
+                shares[name] = base + (index >= who.length - remainder ? 1 : 0);
+            });
+            return shares;
+        }
+
+        function cell(cents) {
+            return cents === null ? '—' : money(cents / 100);
+        }
+
+        function loadAdded() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (!Array.isArray(parsed)) return [];
+                return parsed.map(normalizeAdded).filter(Boolean);
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function normalizeAdded(item) {
+            const who = Array.isArray(item.who) ? item.who.filter(function (name) { return PEOPLE.indexOf(name) >= 0; }) : [];
+            const total = Number(item.total);
+            if (!item || !who.length || !(total > 0)) return null;
+            return {
+                id: String(item.id || ('extra-' + Date.now())),
+                item: String(item.item || 'Cost').slice(0, 80),
+                when: String(item.when || '').slice(0, 40),
+                total: Math.round(total * 100) / 100,
+                who: who,
+                status: 'Booked',
+                kind: item.kind === 'hotel' ? 'hotel' : 'flight',
+                added: true
+            };
+        }
+
+        function saveAdded() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(added));
+        }
+
+        function removeButton(entry) {
+            if (!entry.added) return '';
+            return ' <button type="button" class="remove" data-remove="' + escapeHtml(entry.id) + '">Remove</button>';
+        }
+
+        function peopleCells(shares) {
+            return PEOPLE.map(function (name) {
+                return '<span><em>' + personLabel(name) + '</em>' + cell(shares[name]) + '</span>';
+            }).join('');
+        }
+
+        function itemLabel(entry) {
+            return '<span class="item-label">' + icon(entry.kind) + '<span>' + escapeHtml(entry.item) + '</span></span>';
+        }
+
+        function summaryText() {
+            const lines = [
+                'Australia · 27 Nov 2026 – 8 Jan 2027',
+                '',
+                'Booked so far ' + money(totals.all / 100),
+                'Me ' + money(totals.Me / 100),
+                'Mom ' + money(totals.Mom / 100),
+                'Lola ' + money(totals.Lola / 100),
+                ''
+            ];
+            rows.forEach(function (row) {
+                const entry = row.entry;
+                const price = entry.total === null ? 'not booked' : money(entry.total);
+                const who = entry.who.length ? ' · ' + entry.who.join(', ') : '';
+                lines.push(entry.item + ' · ' + entry.when + ' · ' + price + who);
+            });
+            return lines.join('\n');
+        }
+
+        function render() {
+            totals = { Me: 0, Mom: 0, Lola: 0, all: 0 };
+            rows = BASE.concat(added).map(function (entry) {
+                const shares = split(entry.total, entry.who);
+                const open = entry.status === 'Not booked';
+                if (!open && entry.total !== null) {
+                    totals.all += Math.round(entry.total * 100);
+                    PEOPLE.forEach(function (name) {
+                        if (shares[name] !== null) totals[name] += shares[name];
+                    });
+                }
+                return { entry: entry, shares: shares, open: open };
+            });
+
+            document.getElementById('shares').innerHTML = PEOPLE.map(function (name) {
+                return '<article>' + personLabel(name) + '<strong>' + money(totals[name] / 100) + '</strong></article>';
+            }).join('');
+
+            document.getElementById('booked-total').innerHTML = 'Booked so far <strong>' + money(totals.all / 100) + '</strong>';
+
+            document.getElementById('rows').innerHTML = rows.map(function (row) {
+                const entry = row.entry;
+                return '<tr class="' + (row.open ? 'open' : '') + '">' +
+                    '<td>' + itemLabel(entry) + '</td>' +
+                    '<td>' + escapeHtml(entry.when) + '</td>' +
+                    '<td>' + (entry.total === null ? '—' : money(entry.total)) + '</td>' +
+                    '<td>' + cell(row.shares.Me) + '</td>' +
+                    '<td>' + cell(row.shares.Mom) + '</td>' +
+                    '<td>' + cell(row.shares.Lola) + '</td>' +
+                    '<td class="status">' + escapeHtml(entry.status) + removeButton(entry) + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            document.getElementById('foot').innerHTML =
+                '<td>Booked total</td><td></td><td>' + money(totals.all / 100) + '</td>' +
+                PEOPLE.map(function (name) { return '<td>' + money(totals[name] / 100) + '</td>'; }).join('') +
+                '<td></td>';
+
+            document.getElementById('phone-list').innerHTML = rows.map(function (row) {
+                const entry = row.entry;
+                const price = entry.total === null ? '—' : money(entry.total);
+                return '<li class="' + (row.open ? 'open' : '') + '">' +
+                    '<div class="top">' + itemLabel(entry) + '<span class="status">' + escapeHtml(entry.status) + removeButton(entry) + '</span></div>' +
+                    '<p class="when">' + escapeHtml(entry.when) + ' · ' + price + '</p>' +
+                    '<div class="who">' + peopleCells(row.shares) + '</div>' +
+                    '</li>';
+            }).join('') +
+                '<li class="total"><div class="top"><strong>Booked total</strong><span>' + money(totals.all / 100) + '</span></div>' +
+                '<div class="who">' + peopleCells({ Me: totals.Me, Mom: totals.Mom, Lola: totals.Lola }) + '</div></li>';
+        }
+
+        function showCountdown() {
+            const start = new Date(2026, 10, 27);
+            const end = new Date(2027, 0, 8);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const day = 86400000;
+            let text = 'Trip finished';
+            if (today < start) {
+                const days = Math.round((start - today) / day);
+                text = days === 1 ? '1 day to go' : days + ' days to go';
+            } else if (today.getTime() === start.getTime()) {
+                text = 'You fly today';
+            } else if (today <= end) {
+                text = 'You are on the trip';
+            }
+            document.getElementById('countdown').textContent = text;
+        }
+
+        function showNote(message) {
+            const note = document.getElementById('copy-note');
+            note.hidden = false;
+            note.textContent = message;
+        }
+
+        PEOPLE.forEach(function (name) {
+            document.getElementById('head-' + name).innerHTML = personLabel(name);
+        });
+        showCountdown();
+        render();
+
+        document.getElementById('toggle-add').addEventListener('click', function () {
+            const form = document.getElementById('add-form');
+            const open = form.classList.toggle('is-open');
+            document.getElementById('add-error').hidden = true;
+            if (open) document.getElementById('add-item').focus();
+        });
+
+        document.getElementById('add-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const error = document.getElementById('add-error');
+            const item = document.getElementById('add-item').value.trim();
+            const when = document.getElementById('add-when').value.trim();
+            const total = Number(document.getElementById('add-amount').value);
+            const who = Array.from(document.querySelectorAll('#add-form input[name="who"]:checked')).map(function (box) { return box.value; });
+            const kind = document.querySelector('#add-form input[name="kind"]:checked').value;
+            if (!item || !when || !(total > 0) || !who.length) {
+                error.hidden = false;
+                error.textContent = 'Add a name, a date, an amount, and at least one person.';
+                return;
+            }
+            added.push({
+                id: 'extra-' + Date.now(),
+                item: item,
+                when: when,
+                total: Math.round(total * 100) / 100,
+                who: who,
+                status: 'Booked',
+                kind: kind,
+                added: true
+            });
+            saveAdded();
+            render();
+            event.target.reset();
+            document.querySelector('#add-form input[value="flight"]').checked = true;
+            error.hidden = true;
+            document.getElementById('add-form').classList.remove('is-open');
+            showNote('Added. The totals above include it.');
+        });
+
+        document.querySelector('main').addEventListener('click', function (event) {
+            const button = event.target.closest('[data-remove]');
+            if (!button) return;
+            added = added.filter(function (entry) { return entry.id !== button.dataset.remove; });
+            saveAdded();
+            render();
+        });
+
+        function copyWithFallback(text) {
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'fixed';
+            area.style.opacity = '0';
+            document.body.appendChild(area);
+            area.focus();
+            area.select();
+            let copied = false;
+            try { copied = document.execCommand('copy'); } catch (error) { copied = false; }
+            document.body.removeChild(area);
+            return copied;
+        }
+
+        document.getElementById('copy-summary').addEventListener('click', function () {
+            const text = summaryText();
+            const button = document.getElementById('copy-summary');
+            const box = document.getElementById('summary-box');
+            function done() {
+                box.hidden = true;
+                button.textContent = 'Copied';
+                showNote('Paste it into the family chat.');
+                setTimeout(function () { button.textContent = 'Copy summary'; }, 2000);
+            }
+            function showBox() {
+                box.hidden = false;
+                box.textContent = text;
+                showNote('Copy is blocked in this browser. Select the summary below.');
+            }
+            function tryFallback() {
+                if (copyWithFallback(text)) done();
+                else showBox();
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(tryFallback);
+                return;
+            }
+            tryFallback();
+        });
+    </script>
+</body>
+</html>
