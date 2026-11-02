@@ -274,12 +274,20 @@
 
         .phone-list li:last-child { border-bottom: 0; }
 
-        .phone-list .top {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 2px;
+        .phone-hint { display: none; }
+
+        .phone-list summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2px 12px;
+            align-items: center;
+            min-height: 48px;
+            cursor: pointer;
+            list-style: none;
         }
+
+        .phone-list summary::-webkit-details-marker { display: none; }
+        .phone-list summary::marker { content: ""; }
 
         .phone-list .item-label {
             font-size: 18px;
@@ -287,15 +295,26 @@
             white-space: normal;
         }
 
-        .phone-list .status {
-            font-size: 15px;
-            font-weight: 600;
+        .phone-list .price-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 17px;
+            font-weight: 700;
         }
 
-        .phone-list .when {
-            margin: 4px 0 12px;
+        .phone-list .chevron {
             color: #44403c;
-            font-size: 16px;
+            transition: transform 0.15s ease;
+        }
+
+        .phone-list details[open] .chevron { transform: rotate(180deg); }
+
+        .phone-list .when {
+            grid-column: 1 / -1;
+            margin: 0;
+            color: #44403c;
+            font-size: 15px;
         }
 
         .phone-list .who {
@@ -352,6 +371,7 @@
             }
             header h1 { font-size: 30px; }
             header p, #countdown, .note { font-size: 15px; color: #44403c; }
+            .phone-hint { display: block; }
             .shares { grid-template-columns: 1fr; gap: 8px; }
             .shares article {
                 display: flex;
@@ -440,6 +460,7 @@
                 </tfoot>
             </table>
         </div>
+        <p class="note phone-hint">Tap a cost to see each person’s share.</p>
         <ul class="phone-list" id="phone-list"></ul>
         <p class="note">Manila to Brisbane is split three ways. The extra cent is on Lola so the shares add up to €1,345.00.</p>
     </main>
@@ -556,6 +577,19 @@
             return '<span class="item-label">' + icon(entry.kind) + '<span>' + escapeHtml(entry.item) + '</span></span>';
         }
 
+        function chevron() {
+            return '<svg class="chevron" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+        }
+
+        function phoneDetails(title, meta, price, shares, extra) {
+            return '<details><summary>' + title +
+                '<span class="price-wrap"><span>' + price + '</span>' + chevron() + '</span>' +
+                '<span class="when">' + meta + '</span></summary>' +
+                '<div class="who">' + peopleCells(shares) + '</div>' +
+                (extra || '') +
+                '</details>';
+        }
+
         function summaryText() {
             const lines = [
                 'Australia · 27 Nov 2026 – 8 Jan 2027',
@@ -616,14 +650,15 @@
             document.getElementById('phone-list').innerHTML = rows.map(function (row) {
                 const entry = row.entry;
                 const price = entry.total === null ? '—' : money(entry.total);
+                const meta = escapeHtml(entry.when) + ' · ' + escapeHtml(entry.status);
+                const remove = entry.added ? '<p>' + removeButton(entry) + '</p>' : '';
                 return '<li class="' + (row.open ? 'open' : '') + '">' +
-                    '<div class="top">' + itemLabel(entry) + '<span class="status">' + escapeHtml(entry.status) + removeButton(entry) + '</span></div>' +
-                    '<p class="when">' + escapeHtml(entry.when) + ' · ' + price + '</p>' +
-                    '<div class="who">' + peopleCells(row.shares) + '</div>' +
+                    phoneDetails(itemLabel(entry), meta, price, row.shares, remove) +
                     '</li>';
             }).join('') +
-                '<li class="total"><div class="top"><strong>Booked total</strong><span>' + money(totals.all / 100) + '</span></div>' +
-                '<div class="who">' + peopleCells({ Me: totals.Me, Mom: totals.Mom, Lola: totals.Lola }) + '</div></li>';
+                '<li class="total">' +
+                phoneDetails('<strong>Booked total</strong>', 'Each person', money(totals.all / 100), { Me: totals.Me, Mom: totals.Mom, Lola: totals.Lola }, '') +
+                '</li>';
         }
 
         function showCountdown() {
