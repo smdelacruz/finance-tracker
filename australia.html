@@ -76,6 +76,15 @@
             letter-spacing: -0.02em;
         }
 
+        .shares em {
+            display: block;
+            margin-top: 4px;
+            font-style: normal;
+            font-size: 12px;
+            font-weight: 500;
+            color: #44403c;
+        }
+
         .booked-total {
             margin: 12px 0 0;
             font-size: 14px;
@@ -300,13 +309,15 @@
             .shares { grid-template-columns: 1fr; gap: 8px; }
             .shares article {
                 display: flex;
+                flex-wrap: wrap;
                 align-items: center;
                 justify-content: space-between;
-                gap: 12px;
+                gap: 4px 12px;
                 padding: 14px 16px;
             }
-            .shares .who-label { font-size: 16px; }
+            .shares .who-label { flex: 1; font-size: 16px; }
             .shares strong { margin-top: 0; font-size: 22px; }
+            .shares em { flex: 1 0 100%; margin-top: 2px; font-size: 13px; }
             .booked-total { font-size: 16px; }
             .booked-total strong { font-size: 18px; }
             .table-wrap { display: none; }
@@ -322,8 +333,9 @@
             <p id="countdown"></p>
         </header>
 
-        <section class="shares" id="shares" aria-label="Amount per person so far"></section>
+        <section class="shares" id="shares" aria-label="Amount left per person"></section>
         <p class="booked-total" id="booked-total"></p>
+        <p class="note" id="paid-note"></p>
         <p class="note">Shared costs are split equally. Items that are not booked yet are listed below and are not included above.</p>
 
         <div class="table-wrap">
@@ -358,16 +370,11 @@
             </ul>
         </section>
 
-        <section class="checklist" aria-label="Payments">
-            <h2>Payments</h2>
-            <ul>
-                <li class="done"><span class="check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"/></svg></span>Mom paid Me €834.72</li>
-            </ul>
-        </section>
     </main>
 
     <script>
         const PEOPLE = ['Me', 'Mom', 'Lola'];
+        const PAID = { Me: 0, Mom: 83472, Lola: 0 };
 
         const ITEMS = [
             { item: 'London → Berlin', when: '27 Nov – 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight' },
@@ -469,10 +476,15 @@
             });
 
             document.getElementById('shares').innerHTML = PEOPLE.map(function (name) {
-                return '<article>' + personLabel(name) + '<strong>' + money(totals[name] / 100) + '</strong></article>';
+                const left = totals[name] - PAID[name];
+                const detail = PAID[name]
+                    ? '<em>Share ' + money(totals[name] / 100) + ', paid ' + money(PAID[name] / 100) + '</em>'
+                    : '';
+                return '<article>' + personLabel(name) + '<strong>' + money(left / 100) + '</strong>' + detail + '</article>';
             }).join('');
 
             document.getElementById('booked-total').innerHTML = 'Booked so far <strong>' + money(totals.all / 100) + '</strong>';
+            document.getElementById('paid-note').textContent = 'Mom paid ' + money(PAID.Mom / 100) + '. Her number above is what is left of her share.';
 
             document.getElementById('rows').innerHTML = rows.map(function (row) {
                 const entry = row.entry;
