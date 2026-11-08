@@ -240,6 +240,50 @@
 
         .phone-list li.total { background: var(--paper); }
 
+        .checklist { margin-top: 28px; }
+
+        .checklist h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+        }
+
+        .checklist ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .checklist li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--line);
+            font-size: 16px;
+        }
+
+        .checklist li:last-child { border-bottom: 0; }
+
+        .checklist li.done { font-weight: 600; }
+
+        .checklist li:not(.done) { color: #57534e; }
+
+        .check {
+            width: 18px;
+            height: 18px;
+            border: 1.7px solid currentColor;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: none;
+        }
+
+        .checklist li.done .check { background: var(--ink); color: var(--white); border-color: var(--ink); }
+
         svg { display: block; flex: none; }
         .shares svg { width: 22px; height: 22px; }
 
@@ -304,6 +348,15 @@
         <p class="note phone-hint">Tap a cost to see each person’s share.</p>
         <ul class="phone-list" id="phone-list"></ul>
         <p class="note">Manila to Brisbane is split three ways. The extra cent is on Lola so the shares add up to €1,345.00.</p>
+
+        <section class="checklist" aria-label="Travel insurance">
+            <h2>Travel insurance</h2>
+            <ul>
+                <li class="done"><span class="check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"/></svg></span>Me</li>
+                <li><span class="check" aria-hidden="true"></span>Mom</li>
+                <li class="done"><span class="check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5 10 17.5 19 7"/></svg></span>Lola</li>
+            </ul>
+        </section>
     </main>
 
     <script>
@@ -312,10 +365,11 @@
         const ITEMS = [
             { item: 'London → Berlin', when: '27 Nov – 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight' },
             { item: 'Berlin ↔ Manila', when: '27 Nov – 7 Jan', total: 2808.56, who: ['Me', 'Mom'], status: 'Booked', kind: 'flight' },
-            { item: 'Hotel, Manila', when: '28–29 Nov', total: null, who: [], status: 'Not booked', kind: 'hotel' },
+            { item: 'Hotel, Manila', when: '28–29 Nov', total: null, who: [], status: 'Booked', kind: 'hotel' },
             { item: 'Hotel, Manila', when: '29–30 Nov', total: 0, who: [], status: 'Free, Sir Sam', kind: 'hotel' },
             { item: 'Manila → Brisbane', when: '30 Nov', total: 1345, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight' },
             { item: 'Hotel, Brisbane', when: '30 Nov – 1 Dec', total: null, who: [], status: 'Not booked', kind: 'hotel' },
+            { item: 'Hotel', when: '15–20 Dec', total: null, who: [], status: 'Booked', kind: 'hotel' },
             { item: 'Melbourne → Manila', when: 'Date not set', total: 2407.53, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight' }
         ];
 
