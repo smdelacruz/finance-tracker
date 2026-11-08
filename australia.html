@@ -126,6 +126,11 @@
             text-align: left;
         }
 
+        th:nth-child(2),
+        td:nth-child(2) {
+            white-space: normal;
+        }
+
         thead th {
             background: var(--paper);
             font-size: 12px;
@@ -249,6 +254,98 @@
 
         .phone-list li.total { background: var(--paper); }
 
+        .kind-totals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .kind-totals article {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .kind-totals span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .kind-totals strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 20px;
+            letter-spacing: -0.02em;
+        }
+
+        .calendar, .group, .checklist { margin-top: 28px; }
+
+        .calendar h2, .group h2, .checklist h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+        }
+
+        .group h2 {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin: 0 0 4px;
+            color: #44403c;
+            font-size: 13px;
+        }
+
+        .legend i {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 6px;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+
+        .legend .flight { background: #1c1917; }
+        .legend .hotel { background: #78716c; }
+
+        .month { margin-top: 14px; }
+        .month h3 { margin: 0 0 6px; font-size: 14px; }
+
+        .cal {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+
+        .dow, .day { text-align: center; font-size: 11px; }
+        .dow { color: #78716c; padding-bottom: 2px; }
+
+        .day {
+            min-height: 34px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            color: #a8a29e;
+        }
+
+        .day.in { color: var(--ink); background: var(--paper); }
+
+        .dots { display: flex; gap: 2px; height: 6px; }
+        .dots b { width: 5px; height: 5px; border-radius: 50%; }
+        .dots b.flight { background: #1c1917; }
+        .dots b.hotel { background: #78716c; }
+
+        .group .table-wrap, .group .phone-list { margin-top: 0; }
+
         .checklist { margin-top: 28px; }
 
         .checklist h2 {
@@ -338,27 +435,9 @@
         <p class="note" id="paid-note"></p>
         <p class="note">Shared costs are split equally. Items that are not booked yet are listed below and are not included above.</p>
 
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>When</th>
-                        <th>Total</th>
-                        <th id="head-Me"></th>
-                        <th id="head-Mom"></th>
-                        <th id="head-Lola"></th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="rows"></tbody>
-                <tfoot>
-                    <tr id="foot"></tr>
-                </tfoot>
-            </table>
-        </div>
-        <p class="note phone-hint">Tap a cost to see each person’s share.</p>
-        <ul class="phone-list" id="phone-list"></ul>
+        <section class="kind-totals" id="kind-totals" aria-label="Flight and hotel totals"></section>
+        <section class="calendar" id="calendar" aria-label="Trip calendar"></section>
+        <div id="groups"></div>
         <p class="note">Manila to Brisbane is split three ways. The extra cent is on Lola so the shares add up to €1,345.00.</p>
 
         <section class="checklist" aria-label="Travel insurance">
@@ -377,14 +456,14 @@
         const PAID = { Me: 0, Mom: 83472, Lola: 0 };
 
         const ITEMS = [
-            { item: 'London → Berlin', when: '27 Nov – 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight' },
-            { item: 'Berlin ↔ Manila', when: '27 Nov – 7 Jan', total: 2808.56, who: ['Me', 'Mom'], status: 'Booked', kind: 'flight' },
-            { item: 'Hotel, Manila', when: '28–29 Nov', total: null, who: [], status: 'Booked', kind: 'hotel' },
-            { item: 'Hotel, Manila', when: '29–30 Nov', total: 0, who: [], status: 'Free, Sir Sam', kind: 'hotel' },
-            { item: 'Manila → Brisbane', when: '30 Nov', total: 1345, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight' },
-            { item: 'Hotel, Brisbane', when: '30 Nov – 1 Dec', total: null, who: [], status: 'Not booked', kind: 'hotel' },
-            { item: 'Hotel', when: '15–20 Dec', total: null, who: [], status: 'Booked', kind: 'hotel' },
-            { item: 'Melbourne → Manila', when: 'Date not set', total: 2407.53, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight' }
+            { item: 'London → Berlin', when: 'Departs 27 Nov, returns 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight', start: '2026-11-27', end: '2027-01-08' },
+            { item: 'Berlin ↔ Manila', when: 'Departs 27 Nov, returns 7 Jan', total: 2808.56, who: ['Me', 'Mom'], status: 'Booked', kind: 'flight', start: '2026-11-27', end: '2027-01-07' },
+            { item: 'Manila → Brisbane', when: '30 Nov', total: 1345, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight', start: '2026-11-30' },
+            { item: 'Melbourne → Manila', when: 'Date not set', total: 2407.53, who: ['Me', 'Mom', 'Lola'], status: 'Booked', kind: 'flight' },
+            { item: 'Hotel, Manila', when: '28–29 Nov', total: null, who: [], status: 'Booked', kind: 'hotel', start: '2026-11-28', end: '2026-11-29' },
+            { item: 'Hotel, Manila', when: '29–30 Nov', total: 0, who: [], status: 'Free, Sir Sam', kind: 'hotel', start: '2026-11-29', end: '2026-11-30' },
+            { item: 'Hotel, Brisbane', when: '30 Nov – 1 Dec', total: null, who: [], status: 'Not booked', kind: 'hotel', start: '2026-11-30', end: '2026-12-01' },
+            { item: 'Hotel', when: '15–20 Dec', total: null, who: [], status: 'Booked', kind: 'hotel', start: '2026-12-15', end: '2026-12-20' }
         ];
 
         let totals = { Me: 0, Mom: 0, Lola: 0, all: 0 };
@@ -486,35 +565,116 @@
             document.getElementById('booked-total').innerHTML = 'Booked so far <strong>' + money(totals.all / 100) + '</strong>';
             document.getElementById('paid-note').textContent = 'Mom paid ' + money(PAID.Mom / 100) + '. Her number above is what is left of her share.';
 
-            document.getElementById('rows').innerHTML = rows.map(function (row) {
-                const entry = row.entry;
-                return '<tr class="' + (row.open ? 'open' : '') + '">' +
-                    '<td>' + itemLabel(entry) + '</td>' +
-                    '<td>' + escapeHtml(entry.when) + '</td>' +
-                    '<td>' + (entry.total === null ? '—' : money(entry.total)) + '</td>' +
-                    '<td>' + cell(row.shares.Me) + '</td>' +
-                    '<td>' + cell(row.shares.Mom) + '</td>' +
-                    '<td>' + cell(row.shares.Lola) + '</td>' +
-                    '<td class="status">' + escapeHtml(entry.status) + '</td>' +
-                    '</tr>';
+            const kinds = [
+                { id: 'flight', title: 'Flights', label: 'Flight total' },
+                { id: 'hotel', title: 'Hotels', label: 'Hotel total' }
+            ];
+            const kindSums = {};
+            kinds.forEach(function (kind) {
+                kindSums[kind.id] = { Me: 0, Mom: 0, Lola: 0, all: 0 };
+            });
+            rows.forEach(function (row) {
+                if (row.open || row.entry.total === null) return;
+                const bucket = kindSums[row.entry.kind];
+                bucket.all += Math.round(row.entry.total * 100);
+                PEOPLE.forEach(function (name) {
+                    if (row.shares[name] !== null) bucket[name] += row.shares[name];
+                });
+            });
+
+            document.getElementById('kind-totals').innerHTML = kinds.map(function (kind) {
+                return '<article><span>' + kind.title + '</span><strong>' + money(kindSums[kind.id].all / 100) + '</strong></article>';
             }).join('');
 
-            document.getElementById('foot').innerHTML =
-                '<td>Booked total</td><td></td><td>' + money(totals.all / 100) + '</td>' +
-                PEOPLE.map(function (name) { return '<td>' + money(totals[name] / 100) + '</td>'; }).join('') +
-                '<td></td>';
+            renderCalendar();
 
-            document.getElementById('phone-list').innerHTML = rows.map(function (row) {
-                const entry = row.entry;
-                const price = entry.total === null ? '—' : money(entry.total);
-                const meta = escapeHtml(entry.when) + ' · ' + escapeHtml(entry.status);
-                return '<li class="' + (row.open ? 'open' : '') + '">' +
-                    phoneDetails(itemLabel(entry), meta, price, row.shares) +
-                    '</li>';
-            }).join('') +
-                '<li class="total">' +
-                phoneDetails('<strong>Booked total</strong>', 'Each person', money(totals.all / 100), { Me: totals.Me, Mom: totals.Mom, Lola: totals.Lola }) +
-                '</li>';
+            document.getElementById('groups').innerHTML = kinds.map(function (kind) {
+                const list = rows.filter(function (row) { return row.entry.kind === kind.id; }).sort(function (a, b) {
+                    const left = a.entry.start || '9999';
+                    const right = b.entry.start || '9999';
+                    return left < right ? -1 : left > right ? 1 : 0;
+                });
+                const sums = kindSums[kind.id];
+                const hint = kind.id === 'flight' ? '<p class="note phone-hint">Tap a cost to see each person’s share.</p>' : '';
+                const extra = kind.id === 'hotel' ? '<p class="note">Booked hotels without a price are listed here and are not added to the total.</p>' : '';
+                return '<section class="group"><h2><span>' + kind.title + '</span><span>' + money(sums.all / 100) + '</span></h2>' +
+                    hint +
+                    '<div class="table-wrap"><table><thead><tr><th>Item</th><th>When</th><th>Total</th>' +
+                    PEOPLE.map(function (name) { return '<th>' + personLabel(name) + '</th>'; }).join('') +
+                    '<th>Status</th></tr></thead><tbody>' +
+                    list.map(function (row) {
+                        const entry = row.entry;
+                        return '<tr class="' + (row.open ? 'open' : '') + '"><td>' + itemLabel(entry) + '</td><td>' + escapeHtml(entry.when) + '</td><td>' +
+                            (entry.total === null ? '—' : money(entry.total)) + '</td><td>' + cell(row.shares.Me) + '</td><td>' + cell(row.shares.Mom) + '</td><td>' + cell(row.shares.Lola) + '</td><td class="status">' + escapeHtml(entry.status) + '</td></tr>';
+                    }).join('') +
+                    '</tbody><tfoot><tr><td>' + kind.label + '</td><td></td><td>' + money(sums.all / 100) + '</td>' +
+                    PEOPLE.map(function (name) { return '<td>' + money(sums[name] / 100) + '</td>'; }).join('') +
+                    '<td></td></tr></tfoot></table></div>' +
+                    '<ul class="phone-list">' +
+                    list.map(function (row) {
+                        const entry = row.entry;
+                        const price = entry.total === null ? '—' : money(entry.total);
+                        return '<li class="' + (row.open ? 'open' : '') + '">' + phoneDetails(itemLabel(entry), escapeHtml(entry.when) + ' · ' + escapeHtml(entry.status), price, row.shares) + '</li>';
+                    }).join('') +
+                    '<li class="total">' + phoneDetails('<strong>' + kind.label + '</strong>', 'Each person', money(sums.all / 100), sums) + '</li></ul>' + extra + '</section>';
+            }).join('');
+        }
+
+        function pad(value) {
+            return String(value).padStart(2, '0');
+        }
+
+        function isoFromDate(date) {
+            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+        }
+
+        function dateFromIso(iso) {
+            const parts = iso.split('-').map(Number);
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
+        function renderCalendar() {
+            const marks = {};
+            function add(iso, kind) {
+                if (!marks[iso]) marks[iso] = {};
+                marks[iso][kind] = true;
+            }
+            ITEMS.forEach(function (entry) {
+                if (!entry.start) return;
+                if (entry.kind === 'flight') {
+                    add(entry.start, 'flight');
+                    if (entry.end && entry.end !== entry.start) add(entry.end, 'flight');
+                    return;
+                }
+                const day = dateFromIso(entry.start);
+                const last = dateFromIso(entry.end || entry.start);
+                while (day <= last) {
+                    add(isoFromDate(day), 'hotel');
+                    day.setDate(day.getDate() + 1);
+                }
+            });
+            const dows = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            const months = [[2026, 10], [2026, 11], [2027, 0]].map(function (pair) {
+                const year = pair[0];
+                const month = pair[1];
+                const first = new Date(year, month, 1);
+                const count = new Date(year, month + 1, 0).getDate();
+                let cells = dows.map(function (label) { return '<div class="dow">' + label + '</div>'; }).join('');
+                for (let blank = 0; blank < first.getDay(); blank += 1) cells += '<div></div>';
+                for (let day = 1; day <= count; day += 1) {
+                    const iso = year + '-' + pad(month + 1) + '-' + pad(day);
+                    const mark = marks[iso] || {};
+                    const inTrip = iso >= '2026-11-27' && iso <= '2027-01-08';
+                    const dots = (mark.flight ? '<b class="flight"></b>' : '') + (mark.hotel ? '<b class="hotel"></b>' : '');
+                    cells += '<div class="day' + (inTrip || dots ? ' in' : '') + '"><span>' + day + '</span><span class="dots">' + dots + '</span></div>';
+                }
+                const title = first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+                return '<div class="month"><h3>' + title + '</h3><div class="cal">' + cells + '</div></div>';
+            }).join('');
+            document.getElementById('calendar').innerHTML =
+                '<h2>Calendar</h2><p class="legend"><span><i class="flight"></i>Flight day</span><span><i class="hotel"></i>Hotel day</span></p>' +
+                '<p class="note">Round trips are shown on the departure day and the return day. Melbourne to Manila is not on the calendar yet.</p>' +
+                months;
         }
 
         function showCountdown() {
@@ -535,9 +695,6 @@
             document.getElementById('countdown').textContent = text;
         }
 
-        PEOPLE.forEach(function (name) {
-            document.getElementById('head-' + name).innerHTML = personLabel(name);
-        });
         showCountdown();
         render();
     </script>
