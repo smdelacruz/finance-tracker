@@ -612,10 +612,10 @@
             if (name === 'Lola') {
                 extras += '<p><span>From Mom</span><span>' + money(TO_LOLA.cents / 100) + '</span></p>';
                 extras += '<p class="sum"><span>Left</span><span>' + money(left / 100) + '</span></p>';
-                extras += '<p class="aside">Me and Mom are sharing this: Me ' + money(lolaCover.Me / 100) + ', Mom ' + money(lolaCover.Mom / 100) + '.</p>';
+                extras += '<p class="aside">Me and Mom are sharing what is left: Me ' + money(lolaCover.Me / 100) + ', Mom ' + money(lolaCover.Mom / 100) + '.</p>';
             }
             if (lolaCover[name]) {
-                extras += '<p class="aside">Your part of Lola’s ' + money(totals.Lola / 100) + ' is ' + money(lolaCover[name] / 100) + '.</p>';
+                extras += '<p class="aside">Your part of what Lola has left is ' + money(lolaCover[name] / 100) + '.</p>';
             }
             return '<article><details><summary>' + personLabel(name) + chevron() + '<strong>' + money(left / 100) + '</strong></summary><div class="card-lines">' + lines + extras + '</div></details></article>';
         }
@@ -641,6 +641,7 @@
             lolaCoverNames.forEach(function (name, index) {
                 lolaCover[name] = lolaBase + (index >= lolaCoverNames.length - lolaRemainder ? 1 : 0);
             });
+            lolaCover.Mom -= TO_LOLA.cents;
             const ordered = rows.slice().sort(function (a, b) {
                 const left = a.entry.start || '9999';
                 const right = b.entry.start || '9999';
