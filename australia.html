@@ -496,6 +496,7 @@
             Mom: MOM_PAYMENTS.reduce(function (sum, payment) { return sum + payment.cents; }, 0),
             Lola: 0
         };
+        const TO_LOLA = { from: 'Mom', cents: 32845 };
 
         const ITEMS = [
             { item: 'London → Berlin', when: 'Departs 27 Nov, returns 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight', start: '2026-11-27', end: '2027-01-08' },
@@ -583,8 +584,15 @@
                 '</details>';
         }
 
+        function remaining(name) {
+            let left = totals[name] - PAID[name];
+            if (name === TO_LOLA.from) left += TO_LOLA.cents;
+            if (name === 'Lola') left -= TO_LOLA.cents;
+            return left;
+        }
+
         function personCard(name, ordered, lolaCover) {
-            const left = totals[name] - PAID[name];
+            const left = remaining(name);
             const lines = ordered.filter(function (row) {
                 return row.shares[name] !== null;
             }).map(function (row) {
@@ -598,13 +606,16 @@
                 extras += MOM_PAYMENTS.map(function (payment) {
                     return '<p><span>Paid' + (payment.when ? ' ' + escapeHtml(payment.when) : '') + '</span><span>' + money(payment.cents / 100) + '</span></p>';
                 }).join('');
-                extras += '<p class="sum"><span>' + (left < 0 ? 'Ahead' : 'Left') + '</span><span>' + money(Math.abs(left) / 100) + '</span></p>';
+                extras += '<p><span>Toward Lola</span><span>' + money(TO_LOLA.cents / 100) + '</span></p>';
+                extras += '<p class="sum"><span>Left</span><span>' + money(left / 100) + '</span></p>';
+            }
+            if (name === 'Lola') {
+                extras += '<p><span>From Mom</span><span>' + money(TO_LOLA.cents / 100) + '</span></p>';
+                extras += '<p class="sum"><span>Left</span><span>' + money(left / 100) + '</span></p>';
+                extras += '<p class="aside">Me and Mom are sharing this: Me ' + money(lolaCover.Me / 100) + ', Mom ' + money(lolaCover.Mom / 100) + '.</p>';
             }
             if (lolaCover[name]) {
                 extras += '<p class="aside">Your part of Lola’s ' + money(totals.Lola / 100) + ' is ' + money(lolaCover[name] / 100) + '.</p>';
-            }
-            if (name === 'Lola') {
-                extras += '<p class="aside">Me and Mom are sharing this: Me ' + money(lolaCover.Me / 100) + ', Mom ' + money(lolaCover.Mom / 100) + '.</p>';
             }
             return '<article><details><summary>' + personLabel(name) + chevron() + '<strong>' + money(left / 100) + '</strong></summary><div class="card-lines">' + lines + extras + '</div></details></article>';
         }
