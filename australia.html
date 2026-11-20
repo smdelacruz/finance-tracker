@@ -54,9 +54,31 @@
         .shares article {
             border: 1px solid var(--line);
             border-radius: 12px;
-            padding: 14px 16px;
             background: var(--paper);
         }
+
+        .shares:has(details[open]) { grid-template-columns: 1fr; }
+
+        .shares summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 2px 8px;
+            min-height: 48px;
+            padding: 14px 16px;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .shares summary::-webkit-details-marker { display: none; }
+        .shares summary::marker { content: ""; }
+
+        .shares summary .chevron {
+            color: #44403c;
+            transition: transform 0.15s ease;
+        }
+
+        .shares details[open] .chevron { transform: rotate(180deg); }
 
         .who-label {
             display: inline-flex;
@@ -70,19 +92,40 @@
         }
 
         .shares strong {
+            grid-column: 1 / -1;
             display: block;
             margin-top: 4px;
             font-size: 22px;
             letter-spacing: -0.02em;
         }
 
-        .shares em {
+        .card-lines { padding: 0 16px 12px; }
+
+        .card-lines p {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            margin: 0;
+            padding: 8px 0;
+            border-top: 1px solid var(--line);
+            font-size: 14px;
+        }
+
+        .card-lines .meta {
             display: block;
-            margin-top: 4px;
-            font-style: normal;
-            font-size: 12px;
-            font-weight: 500;
+            margin-top: 2px;
             color: #44403c;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .card-lines .sum { font-weight: 700; }
+
+        .card-lines .aside {
+            display: block;
+            color: #44403c;
+            font-size: 13px;
         }
 
         .booked-total {
@@ -404,17 +447,9 @@
             header p, #countdown, .note { font-size: 15px; color: #44403c; }
             .phone-hint { display: block; }
             .shares { grid-template-columns: 1fr; gap: 8px; }
-            .shares article {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                justify-content: space-between;
-                gap: 4px 12px;
-                padding: 14px 16px;
-            }
-            .shares .who-label { flex: 1; font-size: 16px; }
-            .shares strong { margin-top: 0; font-size: 22px; }
-            .shares em { flex: 1 0 100%; margin-top: 2px; font-size: 13px; }
+            .shares .who-label { font-size: 16px; }
+            .shares strong { font-size: 22px; }
+            .card-lines p { font-size: 16px; }
             .booked-total { font-size: 16px; }
             .booked-total strong { font-size: 18px; }
             .table-wrap { display: none; }
@@ -432,8 +467,6 @@
 
         <section class="shares" id="shares" aria-label="Amount left per person"></section>
         <p class="booked-total" id="booked-total"></p>
-        <p class="note" id="paid-note"></p>
-        <p class="note" id="lola-note"></p>
         <p class="note">Shared costs are split equally. Items that are not booked yet are listed below and are not included above.</p>
 
         <section class="kind-totals" id="kind-totals" aria-label="Flight and hotel totals"></section>
@@ -550,6 +583,32 @@
                 '</details>';
         }
 
+        function personCard(name, ordered, lolaCover) {
+            const left = totals[name] - PAID[name];
+            const lines = ordered.filter(function (row) {
+                return row.shares[name] !== null;
+            }).map(function (row) {
+                const entry = row.entry;
+                return '<p><span>' + escapeHtml(entry.item) +
+                    '<span class="meta">' + escapeHtml(entry.when) + ' · ' + escapeHtml(entry.status) + '</span></span>' +
+                    '<span>' + money(row.shares[name] / 100) + '</span></p>';
+            }).join('');
+            let extras = '<p class="sum"><span>Share</span><span>' + money(totals[name] / 100) + '</span></p>';
+            if (name === 'Mom') {
+                extras += MOM_PAYMENTS.map(function (payment) {
+                    return '<p><span>Paid' + (payment.when ? ' ' + escapeHtml(payment.when) : '') + '</span><span>' + money(payment.cents / 100) + '</span></p>';
+                }).join('');
+                extras += '<p class="sum"><span>' + (left < 0 ? 'Ahead' : 'Left') + '</span><span>' + money(Math.abs(left) / 100) + '</span></p>';
+            }
+            if (lolaCover[name]) {
+                extras += '<p class="aside">Your part of Lola’s ' + money(totals.Lola / 100) + ' is ' + money(lolaCover[name] / 100) + '.</p>';
+            }
+            if (name === 'Lola') {
+                extras += '<p class="aside">Me and Mom are sharing this: Me ' + money(lolaCover.Me / 100) + ', Mom ' + money(lolaCover.Mom / 100) + '.</p>';
+            }
+            return '<article><details><summary>' + personLabel(name) + chevron() + '<strong>' + money(left / 100) + '</strong></summary><div class="card-lines">' + lines + extras + '</div></details></article>';
+        }
+
         function render() {
             totals = { Me: 0, Mom: 0, Lola: 0, all: 0 };
             rows = ITEMS.map(function (entry) {
@@ -564,33 +623,24 @@
                 return { entry: entry, shares: shares, open: open };
             });
 
+            const lolaCoverNames = ['Me', 'Mom'];
+            const lolaBase = Math.floor(totals.Lola / lolaCoverNames.length);
+            const lolaRemainder = totals.Lola - lolaBase * lolaCoverNames.length;
+            const lolaCover = {};
+            lolaCoverNames.forEach(function (name, index) {
+                lolaCover[name] = lolaBase + (index >= lolaCoverNames.length - lolaRemainder ? 1 : 0);
+            });
+            const ordered = rows.slice().sort(function (a, b) {
+                const left = a.entry.start || '9999';
+                const right = b.entry.start || '9999';
+                return left < right ? -1 : left > right ? 1 : 0;
+            });
+
             document.getElementById('shares').innerHTML = PEOPLE.map(function (name) {
-                const left = totals[name] - PAID[name];
-                const detail = PAID[name]
-                    ? '<em>Share ' + money(totals[name] / 100) + ', paid ' + money(PAID[name] / 100) + '</em>'
-                    : '';
-                return '<article>' + personLabel(name) + '<strong>' + money(left / 100) + '</strong>' + detail + '</article>';
+                return personCard(name, ordered, lolaCover);
             }).join('');
 
             document.getElementById('booked-total').innerHTML = 'Booked so far <strong>' + money(totals.all / 100) + '</strong>';
-            const paymentText = MOM_PAYMENTS.map(function (payment, index) {
-                const amount = money(payment.cents / 100);
-                if (index === 0) return amount;
-                return amount + (payment.when ? ' on ' + payment.when : '');
-            }).join(', then ');
-            const momLeft = totals.Mom - PAID.Mom;
-            const momBalance = momLeft < 0
-                ? 'She is ' + money(-momLeft / 100) + ' ahead of her share.'
-                : 'Her number above is what is left of her share.';
-            document.getElementById('paid-note').textContent = 'Mom paid ' + paymentText + ' (' + money(PAID.Mom / 100) + ' in total). ' + momBalance;
-            const lolaCover = ['Me', 'Mom'];
-            const lolaBase = Math.floor(totals.Lola / lolaCover.length);
-            const lolaRemainder = totals.Lola - lolaBase * lolaCover.length;
-            const lolaShares = lolaCover.map(function (name, index) {
-                const cents = lolaBase + (index >= lolaCover.length - lolaRemainder ? 1 : 0);
-                return name + ' ' + money(cents / 100);
-            }).join(', ');
-            document.getElementById('lola-note').textContent = 'Me and Mom are sharing Lola’s ' + money(totals.Lola / 100) + ' between them: ' + lolaShares + '.';
 
             const kinds = [
                 { id: 'flight', title: 'Flights', label: 'Flight total' },
