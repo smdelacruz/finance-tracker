@@ -433,6 +433,7 @@
         <section class="shares" id="shares" aria-label="Amount left per person"></section>
         <p class="booked-total" id="booked-total"></p>
         <p class="note" id="paid-note"></p>
+        <p class="note" id="lola-note"></p>
         <p class="note">Shared costs are split equally. Items that are not booked yet are listed below and are not included above.</p>
 
         <section class="kind-totals" id="kind-totals" aria-label="Flight and hotel totals"></section>
@@ -453,7 +454,15 @@
 
     <script>
         const PEOPLE = ['Me', 'Mom', 'Lola'];
-        const PAID = { Me: 0, Mom: 83472, Lola: 0 };
+        const MOM_PAYMENTS = [
+            { cents: 83472 },
+            { cents: 238332, when: '20 Nov' }
+        ];
+        const PAID = {
+            Me: 0,
+            Mom: MOM_PAYMENTS.reduce(function (sum, payment) { return sum + payment.cents; }, 0),
+            Lola: 0
+        };
 
         const ITEMS = [
             { item: 'London → Berlin', when: 'Departs 27 Nov, returns 8 Jan', total: 234.47, who: ['Mom'], status: 'Booked', kind: 'flight', start: '2026-11-27', end: '2027-01-08' },
@@ -491,7 +500,8 @@
         }
 
         function money(amount) {
-            return '€' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formatted = Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return (amount < 0 ? '−' : '') + '€' + formatted;
         }
 
         function escapeHtml(text) {
@@ -563,7 +573,24 @@
             }).join('');
 
             document.getElementById('booked-total').innerHTML = 'Booked so far <strong>' + money(totals.all / 100) + '</strong>';
-            document.getElementById('paid-note').textContent = 'Mom paid ' + money(PAID.Mom / 100) + '. Her number above is what is left of her share.';
+            const paymentText = MOM_PAYMENTS.map(function (payment, index) {
+                const amount = money(payment.cents / 100);
+                if (index === 0) return amount;
+                return amount + (payment.when ? ' on ' + payment.when : '');
+            }).join(', then ');
+            const momLeft = totals.Mom - PAID.Mom;
+            const momBalance = momLeft < 0
+                ? 'She is ' + money(-momLeft / 100) + ' ahead of her share.'
+                : 'Her number above is what is left of her share.';
+            document.getElementById('paid-note').textContent = 'Mom paid ' + paymentText + ' (' + money(PAID.Mom / 100) + ' in total). ' + momBalance;
+            const lolaCover = ['Me', 'Mom'];
+            const lolaBase = Math.floor(totals.Lola / lolaCover.length);
+            const lolaRemainder = totals.Lola - lolaBase * lolaCover.length;
+            const lolaShares = lolaCover.map(function (name, index) {
+                const cents = lolaBase + (index >= lolaCover.length - lolaRemainder ? 1 : 0);
+                return name + ' ' + money(cents / 100);
+            }).join(', ');
+            document.getElementById('lola-note').textContent = 'Me and Mom are sharing Lola’s ' + money(totals.Lola / 100) + ' between them: ' + lolaShares + '.';
 
             const kinds = [
                 { id: 'flight', title: 'Flights', label: 'Flight total' },
